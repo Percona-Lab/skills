@@ -1,0 +1,28 @@
+# Code owners for Percona-Lab/skills
+#
+# Each skill is owned by the engineering lead for the relevant Percona
+# product. Owners are auto-requested for review on PRs touching their files.
+# Repo-wide catch-all is @dennis-kittrell.
+
+# Catch-all
+*                                       @dennis-kittrell
+
+# Top-level docs and repo configuration
+/README.md                              @dennis-kittrell
+/CONTRIBUTING.md                        @dennis-kittrell
+/LICENSE                                @dennis-kittrell
+/.github/                               @dennis-kittrell
+
+# --- Skill ownership -------------------------------------------------------
+
+# Percona Developer Knowledge MCP companion
+/percona-dk-mcp/                        @dennis-kittrell
+
+# Percona Server for MySQL migration
+/mysql-to-percona/                      @dennis-kittrell @hulyav
+
+# Percona XtraBackup recipes
+/xtrabackup-recipes/                    @dennis-kittrell @satya-bodapati
+
+# Percona Toolkit recipes
+/percona-toolkit-recipes/               @dennis-kittrell @svetasmirnova

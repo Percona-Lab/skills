@@ -1,0 +1,8 @@
+.DS_Store
+.claude/
+.idea/
+.vscode/
+*.mhtml
+*.png
+*.swp
+draft-*.md
