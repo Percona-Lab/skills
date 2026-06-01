@@ -4,29 +4,9 @@
 >
 > **Currently in v0.1 internal dogfood.** If you're one of the testers, see [TESTING.md](TESTING.md) for the install path, test prompts, and feedback flow.
 
-Agent-side knowledge for working with Percona's open-source database software. Drop one of these into your coding agent and it stops guessing about Percona Server, Percona XtraDB Cluster, Percona Server for MongoDB, Percona XtraBackup, PBM, PMM, Percona Toolkit, and the Percona Kubernetes Operators - and starts answering from the things Percona actually ships.
+*Brief your AI tools on Percona. Stop them from guessing.*
 
-These are **not** documentation. They are short, opinionated briefings aimed at the gaps where models get Percona wrong: confusing Percona Server with Percona XtraDB Cluster, suggesting `mysqldump` when XtraBackup is the right answer, citing MySQL Enterprise plugin names for Percona's free equivalents, missing `pt-online-schema-change` entirely. Each skill lists the wrong answer the agent is likely to give, the right answer, and a link to where the real documentation lives at [docs.percona.com](https://docs.percona.com).
-
-## How this works
-
-An *agent skill* is a small markdown file that agents like Claude Code, Cursor, Codex, Gemini CLI, and others load when a user's question matches the skill's description. You install the skill into your agent - nothing changes on your database. From then on, when the topic comes up, the agent reads the file and tailors its answer.
-
-Skills in this repo follow the [Agent Skills](https://agentskills.io) convention, the same format used by other open-source skill packs.
-
-## Better together: Skills + Percona DK
-
-The skills are designed to be used alongside the [Percona Developer Knowledge MCP server](https://github.com/Percona-Lab/percona-dk) (`percona-dk`) at `https://pdk.percona.com/sse`. The MCP exposes semantic search over Percona's official documentation, blog, and community forum (~7K chunks, re-ingested daily).
-
-The two solve different problems and stack:
-
-- **DK alone:** the agent decides what to look up. Its bad defaults (recommend `mysqldump`, miss `pt-online-schema-change`, confuse Percona Server with PXC) win when it never looks up the right thing.
-- **Skills alone:** the agent knows what to recommend, but answers from training data when version-specific detail is needed.
-- **Both together:** Skills correct the defaults AND instruct the agent to call DK for fresh facts. The agent gives the right answer first, then verifies against current docs.
-
-> Together they cover "what's true" (DK) and "what to say first" (Skills).
-
-The product skills in this pack are written to call `search_percona_docs` **eagerly** for any version-specific question (release notes, "is X supported on Y?", error messages), not just as a fallback. If `percona-dk` is not configured when one of these questions comes up, the skill instructs the agent to tell you how to add it. The [`percona-dk-mcp`](percona-dk-mcp/SKILL.md) skill in this pack is the canonical reference for when and how the agent should use the MCP.
+Short markdown briefings that AI coding agents (Claude Code, Cursor, Copilot, Codex, Gemini CLI, etc.) load automatically when a Percona topic comes up. Each skill is one file: it tells the agent what to recommend, what to avoid, and where to look something up. No fine-tuning, no integration. Drop a file in the agent's skills folder; it activates on every relevant question from then on.
 
 ## v0.1 skills
 
@@ -36,6 +16,16 @@ The product skills in this pack are written to call `search_percona_docs` **eage
 | [`mysql-to-percona`](mysql-to-percona/SKILL.md) | Drop-in migration from upstream MySQL to Percona Server for MySQL. The Percona-only plugins (audit, thread pool, PAM/LDAP, data masking) and the variables agents miss. |
 | [`xtrabackup-recipes`](xtrabackup-recipes/SKILL.md) | Hot physical backups with Percona XtraBackup - full, incremental, streamed, compressed, encrypted, restored. PS 8.0 vs 8.4 differences. |
 | [`percona-toolkit-recipes`](percona-toolkit-recipes/SKILL.md) | When to reach for `pt-online-schema-change`, `pt-archiver`, `pt-query-digest`, `pt-table-checksum` instead of the obvious-but-wrong alternative. |
+
+## Better together: Skills + Percona DK
+
+The skills are designed to pair with the [Percona Developer Knowledge MCP server](https://github.com/Percona-Lab/percona-dk) (`percona-dk`) at `https://pdk.percona.com/sse`, which exposes semantic search over Percona's docs, blog, and forums (~7K chunks, re-ingested daily).
+
+- **DK alone:** the agent decides what to look up. Its bad defaults (recommend `mysqldump`, miss `pt-online-schema-change`, confuse Percona Server with PXC) win when it never looks up the right thing.
+- **Skills alone:** the agent knows what to recommend, but answers from training data when version-specific detail is needed.
+- **Both together:** Skills correct the defaults AND tell the agent to call DK eagerly for fresh facts. If DK is missing, the skill surfaces the install command to the user in context.
+
+> Together they cover "what's true" (DK) and "what to say first" (Skills).
 
 ## Roadmap
 
@@ -80,7 +70,7 @@ curl -L https://raw.githubusercontent.com/Percona-Lab/skills/main/mysql-to-perco
 - **OpenAI Codex** - `~/.agents/skills/<skill-name>/SKILL.md`
 - **Cursor, Windsurf, Gemini CLI** - see each tool's skills / extensions documentation.
 
-No further setup is needed for the skills themselves. The agent reads each skill's `description` frontmatter at startup and loads the file on demand whenever a user prompt matches what the skill is about.
+The agent reads each skill's `description` frontmatter at startup and loads the file on demand whenever a user prompt matches.
 
 ### Pair with Percona DK (recommended)
 
