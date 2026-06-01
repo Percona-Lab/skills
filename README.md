@@ -12,11 +12,19 @@ An *agent skill* is a small markdown file that agents like Claude Code, Cursor, 
 
 Skills in this repo follow the [Agent Skills](https://agentskills.io) convention, the same format used by other open-source skill packs.
 
-## Better together: Percona Developer Knowledge MCP
+## Better together: Skills + Percona DK
 
-The skills are designed to be used alongside the Percona Developer Knowledge MCP server (`percona-dk`) at `https://pdk.percona.com/sse`. The MCP exposes semantic search over Percona's official documentation, blog, and community forum - ~7K chunks, re-ingested daily. Source: [github.com/Percona-Lab/percona-dk](https://github.com/Percona-Lab/percona-dk).
+The skills are designed to be used alongside the [Percona Developer Knowledge MCP server](https://github.com/Percona-Lab/percona-dk) (`percona-dk`) at `https://pdk.percona.com/sse`. The MCP exposes semantic search over Percona's official documentation, blog, and community forum (~7K chunks, re-ingested daily).
 
-The skills tell the agent *what to do* and *what to avoid*. The MCP gives it the live source material to back it up. The [`percona-dk-mcp`](percona-dk-mcp/SKILL.md) skill teaches the agent when and how to call it.
+The two solve different problems and stack:
+
+- **DK alone:** the agent decides what to look up. Its bad defaults (recommend `mysqldump`, miss `pt-online-schema-change`, confuse Percona Server with PXC) win when it never looks up the right thing.
+- **Skills alone:** the agent knows what to recommend, but answers from training data when version-specific detail is needed.
+- **Both together:** Skills correct the defaults AND instruct the agent to call DK for fresh facts. The agent gives the right answer first, then verifies against current docs.
+
+> Together they cover "what's true" (DK) and "what to say first" (Skills).
+
+The product skills in this pack are written to call `search_percona_docs` **eagerly** for any version-specific question (release notes, "is X supported on Y?", error messages), not just as a fallback. If `percona-dk` is not configured when one of these questions comes up, the skill instructs the agent to tell you how to add it. The [`percona-dk-mcp`](percona-dk-mcp/SKILL.md) skill in this pack is the canonical reference for when and how the agent should use the MCP.
 
 ## v0.1 skills
 
@@ -70,7 +78,17 @@ curl -L https://raw.githubusercontent.com/Percona-Lab/skills/main/mysql-to-perco
 - **OpenAI Codex** - `~/.agents/skills/<skill-name>/SKILL.md`
 - **Cursor, Windsurf, Gemini CLI** - see each tool's skills / extensions documentation.
 
-No further setup is needed. The agent reads each skill's `description` frontmatter at startup and loads the file on demand whenever a user prompt matches what the skill is about.
+No further setup is needed for the skills themselves. The agent reads each skill's `description` frontmatter at startup and loads the file on demand whenever a user prompt matches what the skill is about.
+
+### Pair with Percona DK (recommended)
+
+For full value, also enable the Percona Developer Knowledge MCP. One line for Claude Code:
+
+```
+claude mcp add --transport sse percona-dk https://pdk.percona.com/sse
+```
+
+For other agents (Cursor, Windsurf, Codex, Gemini CLI), see [`percona-dk-mcp/SKILL.md`](percona-dk-mcp/SKILL.md) for per-tool configuration. Without DK, the skills still work; the agent will note when an answer would benefit from fresher docs and offer the install command in context.
 
 ## Prior art
 
