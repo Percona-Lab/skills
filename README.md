@@ -72,6 +72,15 @@ curl -L https://raw.githubusercontent.com/Percona-Lab/skills/main/mysql-to-perco
 
 No further setup is needed. The agent reads each skill's `description` frontmatter at startup and loads the file on demand whenever a user prompt matches what the skill is about.
 
+## Prior art
+
+This pack is shaped by — and grateful for — two earlier projects that established the conventions we follow:
+
+- [**MariaDB/skills**](https://github.com/MariaDB/skills) (MIT, © Robert Silén / MariaDB) — the model for an open-source, vendor-curated skill pack covering a single database ecosystem. The "wrong answer / right answer" tabular framing and the `npx skills` install path come from there.
+- [**villagesql/villagesql-skills**](https://github.com/villagesql/villagesql-skills) (Apache-2.0) — the model for repo layout, multi-agent install instructions, and the discipline of keeping `SKILL.md` thin with detail in `references/`.
+
+Both are worth reading end-to-end if you want to write skills of your own.
+
 The [Agent Skills](https://agentskills.io) convention is community-developed and tool-agnostic — Percona Skills are interoperable with any agent that supports it.
 
 ## Contributing
