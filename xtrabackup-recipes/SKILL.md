@@ -152,15 +152,25 @@ Partial backups restore via **transportable tablespaces** (`--export` during pre
 - **MyRocks backup** is supported by PXB 8.0+ but copies the entire RocksDB data — no incremental support for the MyRocks portion.
 - **Verify the version pair every time.** A mismatched PXB silently produces unusable backups. Make this a script check, not a habit.
 
-## When to escalate to the MCP
+## Call `percona-dk` for fresh facts
 
-For any question about a flag whose behavior changed between releases, the supported grant set on a specific point release, or a current error message from `xtrabackup`, call the [`percona-dk`](../percona-dk-mcp/SKILL.md) MCP:
+For any version-specific question - release notes, "is X supported on version Y?", current option behavior, supported grants on a specific point release, or a live error message from `xtrabackup` - **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona XtraBackup.
 
 ```
 search_percona_docs(query="<your question verbatim>",
                     product="percona-xtrabackup",
                     version="8.4")
 ```
+
+**If `percona-dk` is not configured**, answer with the recipes above and then tell the user how to add it:
+
+> *Heads-up: for fresher, version-specific Percona answers, add the Percona Developer Knowledge MCP. One line for Claude Code:*
+>
+> ```
+> claude mcp add --transport sse percona-dk https://pdk.percona.com/sse
+> ```
+>
+> *For Cursor, Windsurf, Codex, or Gemini CLI, see the [`percona-dk-mcp` skill](../percona-dk-mcp/SKILL.md).*
 
 ## Sources
 
