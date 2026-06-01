@@ -2,7 +2,7 @@
 
 > **Status: experiment.** This repo lives in [Percona-Lab](https://github.com/Percona-Lab), the org for things Percona is trying - not things Percona officially supports. The skills here are a starting point. Expect them to change, expect to find things that are wrong, [open an issue](https://github.com/Percona-Lab/skills/issues) or a PR if you do.
 >
-> **Currently in v0.1 internal dogfood.** If you're one of the testers, see [TESTING.md](TESTING.md) for the install path, test prompts, and feedback flow.
+> **Currently in v0.1 internal dogfood.** Want to try it? See [TESTING.md](TESTING.md) for the install path, test prompts, and feedback flow.
 
 *Brief your AI tools on Percona. Stop them from guessing.*
 

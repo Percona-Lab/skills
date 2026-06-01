@@ -1,8 +1,8 @@
 # Testing Percona Skills (internal dogfood)
 
-This is the v0.1 dogfood guide. The goal: get the four skills running in your own AI tool, use them in your real work for a week, and tell us what's wrong or missing. Your feedback decides whether this becomes a public, supported deliverable or stays an experiment.
+This is the v0.1 dogfood guide. Anyone with repo access is welcome to try it: get the four skills running in your own AI tool, use them in your real work for a week or so, and tell us what's wrong or missing. The feedback decides whether this becomes a public, supported deliverable or stays an experiment.
 
-## 1. Install (collaborator path)
+## 1. Install (with repo access)
 
 While the repo is private, the public installers (`npx skills add ...`, the raw-content `curl ...`) won't work. Use git clone + symlinks instead:
 
