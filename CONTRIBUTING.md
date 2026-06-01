@@ -15,7 +15,7 @@ If a section reads like a tutorial or product brochure, it doesn't belong in a s
 ## Conventions
 
 - **One folder per skill** at the repo root: `<skill-name>/SKILL.md`.
-- **Frontmatter** with `name` and a specific `description` — the description is what makes the agent decide whether to load the skill. Bad descriptions ("Percona MySQL stuff") never trigger; good descriptions enumerate the tasks and symptoms that should activate the skill.
+- **Frontmatter** with `name` and a specific `description` - the description is what makes the agent decide whether to load the skill. Bad descriptions ("Percona MySQL stuff") never trigger; good descriptions enumerate the tasks and symptoms that should activate the skill.
 - **Voice**: terse, imperative, no marketing language. Match the existing skills.
 - **Wrong/right pairs** in a two-column table for every claim where the agent is likely to be wrong.
 - **Version annotations** on everything version-sensitive:
@@ -24,7 +24,7 @@ If a section reads like a tutorial or product brochure, it doesn't belong in a s
   - PMM: 2.x vs 3.x.
 - **Links** to [docs.percona.com](https://docs.percona.com), Jira ([jira.percona.com](https://jira.percona.com)), and the relevant GitHub repo under [github.com/percona](https://github.com/percona).
 - **Length**: SKILL.md should fit on one screen unless it genuinely needs more. Detail-heavy material goes in `references/*.md` (loaded by the agent on demand).
-- **Reference the percona-dk MCP** in every skill where deeper lookup makes sense — pattern:
+- **Reference the percona-dk MCP** in every skill where deeper lookup makes sense - pattern:
   > If `percona-dk` is available, call `search_percona_docs` with `query="…", product="…", version="…"`.
 
 ## Filing an issue first
