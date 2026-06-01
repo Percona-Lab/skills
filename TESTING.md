@@ -37,7 +37,7 @@ For other agents, see [`percona-dk-mcp/SKILL.md`](percona-dk-mcp/SKILL.md) for p
 
 Start a fresh AI session for each. Watch what happens: does the right skill load? Does the agent call DK? Is the answer correct?
 
-### mysql-to-percona (@hulyav)
+### mysql-to-percona
 
 - "What's the difference between Percona Server and Percona XtraDB Cluster?"
 - "I want to migrate from MySQL Enterprise to Percona Server. What plugin equivalents should I use for the audit log, thread pool, and PAM authentication?"
@@ -45,7 +45,7 @@ Start a fresh AI session for each. Watch what happens: does the right skill load
 - "How do I enable per-user statistics in Percona Server 8.4?"
 - "What's the right way to back up a 100GB Percona Server database?"
 
-### xtrabackup-recipes (@satya-bodapati)
+### xtrabackup-recipes
 
 - "How do I take an encrypted incremental backup with XtraBackup 8.4?"
 - "I need to back up a PXC node so it can be used as an SST source. What flags do I need?"
@@ -53,7 +53,7 @@ Start a fresh AI session for each. Watch what happens: does the right skill load
 - "What's the default compression algorithm in PXB 8.4? What changed from 8.0?"
 - "My XtraBackup --prepare is failing on an incremental chain. Walk me through the correct prepare sequence."
 
-### percona-toolkit-recipes (@svetasmirnova)
+### percona-toolkit-recipes
 
 - "I need to ALTER a 50M-row table on a live production database without downtime. What's the safest way?"
 - "How do I archive old rows from a busy table without overwhelming replication?"
@@ -80,7 +80,7 @@ What we especially want to hear about:
 - **Wrong scope** - the skill triggered when it shouldn't have, or didn't when it should have
 - **Bad UX** - the agent answer was technically right but unusable for the real task
 
-Quick fixes can also be a PR straight to the file. The CODEOWNERS routing means your name is on your skill, but you do not need to wait for review to push small corrections.
+Quick fixes can also be a PR straight to the file. Small corrections (wrong facts, typos, broken links) do not need to wait for review.
 
 DM Dennis on Slack for anything hard to put in an issue.
 
