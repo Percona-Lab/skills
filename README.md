@@ -1,6 +1,8 @@
 # Percona Skills
 
 > **Status: experiment.** This repo lives in [Percona-Lab](https://github.com/Percona-Lab), the org for things Percona is trying - not things Percona officially supports. The skills here are a starting point. Expect them to change, expect to find things that are wrong, [open an issue](https://github.com/Percona-Lab/skills/issues) or a PR if you do.
+>
+> **Currently in v0.1 internal dogfood.** If you're one of the testers, see [TESTING.md](TESTING.md) for the install path, test prompts, and feedback flow.
 
 Agent-side knowledge for working with Percona's open-source database software. Drop one of these into your coding agent and it stops guessing about Percona Server, Percona XtraDB Cluster, Percona Server for MongoDB, Percona XtraBackup, PBM, PMM, Percona Toolkit, and the Percona Kubernetes Operators - and starts answering from the things Percona actually ships.
 
