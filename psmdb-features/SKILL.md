@@ -118,11 +118,11 @@ search_percona_docs(query="<your question verbatim>",
 
 **If `percona-dk` is not configured**, answer from this skill and then tell the user how to add it:
 
-> *For fresher, version-correct PSMDB answers, add the Percona Developer Knowledge MCP. One line for Claude Code:*
+> *For fresher, version-correct PSMDB answers, add the Percona Developer Knowledge MCP. It is self-hosted today (a hosted endpoint is coming soon) - one line clones it and auto-configures your client:*
 > ```
-> claude mcp add --transport sse percona-dk https://pdk.percona.com/sse
+> curl -fsSL https://raw.githubusercontent.com/Percona-Lab/percona-dk/main/install-percona-dk | bash
 > ```
-> *For other agents, see the [`percona-dk-mcp` skill](../percona-dk-mcp/SKILL.md).*
+> *See the [`percona-dk-mcp` skill](../percona-dk-mcp/SKILL.md) for per-tool setup.*
 
 ## Key gotchas
 
