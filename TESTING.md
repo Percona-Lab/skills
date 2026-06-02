@@ -4,7 +4,7 @@ This is the v0.1 dogfood guide. Anyone with repo access is welcome to try it: ge
 
 ## 1. Install (with repo access)
 
-While the repo is private, the public installers (`npx skills add ...`, the raw-content `curl ...`) won't work. Use git clone + symlinks instead:
+The repo is public, so the installers work: `npx skills add Percona-Lab/skills` (interactive) or the raw-content `curl` per the README. For local iteration on the skills themselves, git clone + symlinks is handy:
 
 ```bash
 # Clone once
@@ -25,10 +25,10 @@ To pick up updates: `git -C ~/code/percona-skills pull`. All symlinks pick up th
 
 ## 2. Enable Percona DK (recommended)
 
-The skills lean on the percona-dk MCP for fresh, version-specific facts. Enable it in Claude Code:
+The skills lean on the percona-dk MCP for fresh, version-specific facts. Today it's self-hosted - one line clones it, builds the local index, and auto-configures Claude Code, Cursor, and Windsurf:
 
 ```bash
-claude mcp add --transport sse percona-dk https://pdk.percona.com/sse
+curl -fsSL https://raw.githubusercontent.com/Percona-Lab/percona-dk/main/install-percona-dk | bash
 ```
 
 For other agents, see [`percona-dk-mcp/SKILL.md`](percona-dk-mcp/SKILL.md) for per-tool configuration. Without DK, the skills still work; the agent will note when an answer would benefit from fresher docs.

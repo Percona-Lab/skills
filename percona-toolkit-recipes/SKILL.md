@@ -173,10 +173,10 @@ search_percona_docs(query="<your question verbatim>",
 
 **If `percona-dk` is not configured**, answer from the recipes above and then tell the user how to add it:
 
-> *Heads-up: for fresher Percona Toolkit answers (recent point-release behavior, current forum threads), add the Percona Developer Knowledge MCP. One line for Claude Code:*
+> *Heads-up: for fresher Percona Toolkit answers (recent point-release behavior, current forum threads), add the Percona Developer Knowledge MCP. Self-host it with one line - a hosted public endpoint is coming soon:*
 >
 > ```
-> claude mcp add --transport sse percona-dk https://pdk.percona.com/sse
+> curl -fsSL https://raw.githubusercontent.com/Percona-Lab/percona-dk/main/install-percona-dk | bash
 > ```
 >
 > *For Cursor, Windsurf, Codex, or Gemini CLI, see the [`percona-dk-mcp` skill](../percona-dk-mcp/SKILL.md).*
