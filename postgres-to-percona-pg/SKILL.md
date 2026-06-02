@@ -55,7 +55,7 @@ CREATE EXTENSION pg_tde;           -- requires a DB restart after enabling
 CREATE TABLE secret (id int) USING tde_heap;
 ```
 
-`tde_heap` (full: tables + indexes + WAL) is confirmed on **Percona Server for PostgreSQL 17** (and 18). For PG 16, verify availability via the MCP before claiming it - the current `pg_tde` docs name 17/18. Key providers: HashiCorp Vault, OpenBao, KMIP servers, and a local keyfile (development only). WAL encryption needs a DB restart.
+`tde_heap` (full: tables + indexes + WAL) is confirmed on **Percona Server for PostgreSQL 17** (and 18). For PG 16, verify availability via the MCP before claiming it - the current `pg_tde` docs name 17/18. Key providers: HashiCorp Vault, OpenBao, KMIP servers, and a local keyfile (development only). WAL encryption reached GA in `pg_tde` 2.0 (shipped in Percona Distribution for PostgreSQL 17.5.3), but it is **opt-in**: it's off by default (`pg_tde.wal_encrypt`), and enabling it needs a configured global principal key and a server restart.
 
 ## Recipe: HA stack
 
