@@ -61,6 +61,41 @@ Start a fresh AI session for each. Watch what happens: does the right skill load
 - "Why is my pt-online-schema-change failing on a table with foreign keys?"
 - "Analyze a slow query log and show me the top time consumers."
 
+### pmm-operations
+
+- "Install a PMM server and add a MySQL instance to monitoring."
+- "I added a MongoDB instance to PMM but Query Analytics is empty. Why?"
+- "My PMM client won't register, I get a 404 at config time. What's wrong?"
+- "How do I write a custom metric query for the PostgreSQL exporter in PMM?"
+
+### psmdb-features
+
+- "How do I enable data-at-rest encryption on Percona Server for MongoDB 8.0 with HashiCorp Vault?"
+- "Set up audit logging on PSMDB and only log authentication events."
+- "Does PSMDB support LDAP authentication? How is it different from MongoDB Enterprise?"
+- "I'm upgrading PSMDB from 7.0 to 8.0 - anything about Transparent Huge Pages I should know?"
+
+### pbm-recipes
+
+- "Take a physical backup of my MongoDB replica set and enable point-in-time recovery."
+- "Restore my sharded cluster to a specific timestamp with PBM."
+- "I want to restore only one database from a PBM backup."
+- "Walk me through a PBM physical restore - what are the gotchas?"
+
+### pxc-galera-operations
+
+- "My whole 3-node PXC cluster went down after a power outage. How do I bring it back?"
+- "How do I add a new node to a running PXC cluster, and when does it do SST vs IST?"
+- "What's the safest way to run a large ALTER TABLE on a PXC cluster?"
+- "Why did my 2-node PXC cluster stop accepting writes when one node failed?"
+
+### percona-operators-on-k8s
+
+- "Write a Custom Resource for a 3-node Percona PostgreSQL cluster on Kubernetes."
+- "How do I scale my PerconaXtraDBCluster from 3 to 5 nodes?"
+- "Configure scheduled S3 backups for the Percona MongoDB operator."
+- "How do I do a major version upgrade with the Percona PostgreSQL operator?"
+
 ### percona-dk-mcp (mostly exercised by the others, but try direct queries too)
 
 - "What changed in Percona Server 8.4.7?"
