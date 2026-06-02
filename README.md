@@ -8,7 +8,7 @@
 
 Short markdown briefings that AI coding agents (Claude Code, Cursor, Copilot, Codex, Gemini CLI, etc.) load automatically when a Percona topic comes up. Each skill is one file: it tells the agent what to recommend, what to avoid, and where to look something up. No fine-tuning, no integration. Drop a file in the agent's skills folder; it activates on every relevant question from then on.
 
-## v0.1 skills
+## Skills
 
 | Skill | What it covers |
 |---|---|
@@ -16,6 +16,11 @@ Short markdown briefings that AI coding agents (Claude Code, Cursor, Copilot, Co
 | [`mysql-to-percona`](mysql-to-percona/SKILL.md) | Drop-in migration from upstream MySQL to Percona Server for MySQL. The Percona-only plugins (audit, thread pool, PAM/LDAP, data masking) and the variables agents miss. |
 | [`xtrabackup-recipes`](xtrabackup-recipes/SKILL.md) | Hot physical backups with Percona XtraBackup - full, incremental, streamed, compressed, encrypted, restored. PS 8.0 vs 8.4 differences. |
 | [`percona-toolkit-recipes`](percona-toolkit-recipes/SKILL.md) | When to reach for `pt-online-schema-change`, `pt-archiver`, `pt-query-digest`, `pt-table-checksum` instead of the obvious-but-wrong alternative. |
+| [`pmm-operations`](pmm-operations/SKILL.md) | Percona Monitoring and Management: install, client agents, Query Analytics, custom queries, alerting. PMM 2 vs 3 (and why they don't interoperate). |
+| [`psmdb-features`](psmdb-features/SKILL.md) | Percona Server for MongoDB: hot backup, encryption, audit, LDAP/Kerberos/OIDC, in-memory engine - the MongoDB Enterprise features it ships free, with version gates. |
+| [`pbm-recipes`](pbm-recipes/SKILL.md) | Percona Backup for MongoDB: logical/physical/incremental backups, PITR, selective restore, sharded clusters, the physical-restore footguns. |
+| [`pxc-galera-operations`](pxc-galera-operations/SKILL.md) | Percona XtraDB Cluster: SST/IST, bootstrap after outage, flow control, split-brain/quorum, `pxc_strict_mode`, Clone SST. |
+| [`percona-operators-on-k8s`](percona-operators-on-k8s/SKILL.md) | Operators for PXC/MongoDB/PostgreSQL/MySQL: CR patterns, backups, scaling, upgrades - and the per-operator field differences agents hallucinate. |
 
 ## Better together: Skills + Percona DK
 
@@ -29,13 +34,8 @@ The skills pair with the [Percona Developer Knowledge MCP server](https://github
 
 ## Roadmap
 
-These are next, in rough order of expected usefulness - open an issue or PR if you'd like to pull one forward:
+These are next - open an issue or PR if you'd like to pull one forward:
 
-- `pmm-operations` - Percona Monitoring and Management: install, client agents, custom queries, alerting.
-- `psmdb-features` - Percona Server for MongoDB: hot backup, encryption, auditing, LDAP, things upstream MongoDB Community doesn't have.
-- `pbm-recipes` - Percona Backup for MongoDB: PITR, selective restore, sharded clusters.
-- `pxc-galera-operations` - Percona XtraDB Cluster operations: SST/IST, flow control, split-brain, bootstrap.
-- `percona-operators-on-k8s` - Operators for MySQL, PXC, PostgreSQL, MongoDB: CR patterns, backups, scaling, upgrades.
 - `postgres-to-percona-pg` - Migration to Percona Distribution for PostgreSQL.
 - `mongodb-to-psmdb` - Migration to Percona Server for MongoDB.
 
