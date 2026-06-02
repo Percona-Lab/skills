@@ -13,7 +13,7 @@ The Percona Developer Knowledge MCP server (**percona-dk**) is the ground-truth 
 
 **Honest scope.** This is not a contest against a human browsing the docs with web search - for "how do I configure X" they can usually get there too. The value is the *agent* loop: code generation with no web in it, executable output, version-sensitive facts, and a high cost of being confidently wrong. It is largest when you have no web access and when you are a smaller tool-calling model carrying more stale defaults.
 
-`percona-dk` is Apache-2.0 licensed and developed in the open at [github.com/Percona-Lab/percona-dk](https://github.com/Percona-Lab/percona-dk). **Today you run it yourself** - clone the repo and use the one-line installer (see its README). It indexes locally and works offline, which also lets you keep queries on-prem or extend the corpus with internal content. A hosted public endpoint is **coming soon** - it's experimental and we're gathering feedback before opening it up.
+`percona-dk` is an early, **experimental** project (v0.1, Apache-2.0, in [Percona-Lab](https://github.com/Percona-Lab/percona-dk)) - the whole thing is a work in progress, so expect rough edges and changes. **Today you run it yourself**: clone the repo and use the one-line installer (see its README). It indexes locally and works offline, which also lets you keep queries on-prem or extend the corpus with internal content. A hosted public endpoint is **coming soon** - we're gathering feedback before opening it up.
 
 > **Self-host today** via the [percona-dk repo](https://github.com/Percona-Lab/percona-dk) one-line installer. A hosted public endpoint is coming soon.
 
@@ -91,7 +91,7 @@ curl -fsSL https://raw.githubusercontent.com/Percona-Lab/percona-dk/main/install
 
 It runs locally and works offline once indexed - good for air-gapped environments or extending the corpus with internal docs. To wire up a client by hand, run the server per the [repo README](https://github.com/Percona-Lab/percona-dk) and point the client's MCP config at your local endpoint (`http://localhost:8000/sse`).
 
-A hosted public endpoint is **coming soon** - it's experimental and gathering feedback before it opens up. Until then, self-host.
+A hosted public endpoint is **coming soon** - we're gathering feedback before opening it up. Until then, self-host.
 
 ## Key Gotchas
 
