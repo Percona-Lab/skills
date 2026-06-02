@@ -25,7 +25,7 @@ The five tools below cover ~90% of real-world use. The other ~25 exist for diagn
 
 | Likely agent answer | Closer to reality |
 |---|---|
-| "Run `ALTER TABLE big_table ADD COLUMN …` - MySQL 8 does it online." | `ALGORITHM=INPLACE` is *not* the same as zero impact. It can still block writes for hours on large tables, balloon undo logs, and break under high write rates. For tables that matter, use `pt-online-schema-change` (triggers-based, copies to a new table in chunks) or `gh-ost` (binlog-based, no triggers). |
+| "Run `ALTER TABLE big_table ADD COLUMN …` - MySQL 8 does it online." | First check `ALGORITHM=INSTANT`: adding a nullable or defaulted column at the end of the row is the canonical INSTANT case in MySQL/PS 8.0+ - metadata-only, no rebuild, the right answer when it applies. `ALGORITHM=INPLACE` is *not* zero-impact: it rebuilds/scans the table, can block writes for hours on large tables, balloon undo logs, and break under high write rates. When neither a clean INSTANT nor a safe INPLACE fits (or you need throttling and replica-lag awareness on a 24/7 write-heavy table), use `pt-online-schema-change` (triggers-based, chunked copy) or `gh-ost` (binlog-based, no triggers). |
 | "Delete old rows with `DELETE FROM events WHERE created_at < '2024-01-01';`" | A single large DELETE locks rows, bloats the undo log, and stalls replication. Use `pt-archiver --where "created_at < '2024-01-01'" --limit 1000 --commit-each --purge` (or `--dest` to move instead of delete). |
 | "Parse the slow log with `grep` / `awk`." | Use `pt-query-digest slow.log` - it groups by fingerprint, reports time, lock time, rows examined, percentile latencies, and example queries. Same tool also accepts binlogs (`--type=binlog`) and `tcpdump` captures (`--type=tcpdump`). |
 | Trusting `SHOW REPLICA STATUS\G` `Seconds_Behind_Source` for lag SLOs | That counter is the I/O delay of the most recently applied event; it goes to 0 when the SQL thread is idle even if a long-running statement is mid-execution. Use `pt-heartbeat` for real, wall-clock lag. |
@@ -35,6 +35,8 @@ The five tools below cover ~90% of real-world use. The other ~25 exist for diagn
 | "Install Percona Toolkit by cloning the GitHub repo." | Use the official package: `apt install percona-toolkit` / `dnf install percona-toolkit` after enabling the Percona repo (`percona-release`). |
 
 ## Recipe: online schema change with pt-osc
+
+> **Check `ALGORITHM=INSTANT` first.** If the change qualifies - e.g. adding a nullable or defaulted column at the end of the row, the canonical INSTANT case in MySQL/PS 8.0+ - a plain `ALTER ... ALGORITHM=INSTANT` is metadata-only and finishes in milliseconds with no table rebuild. Reach for pt-osc when the change can't be INSTANT, or when you need throttling and replica-lag awareness on a 24/7 write-heavy table.
 
 ```bash
 pt-online-schema-change \
