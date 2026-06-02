@@ -21,6 +21,8 @@ Short markdown briefings that AI coding agents (Claude Code, Cursor, Copilot, Co
 | [`pbm-recipes`](pbm-recipes/SKILL.md) | Percona Backup for MongoDB: logical/physical/incremental backups, PITR, selective restore, sharded clusters, the physical-restore footguns. |
 | [`pxc-galera-operations`](pxc-galera-operations/SKILL.md) | Percona XtraDB Cluster: SST/IST, bootstrap after outage, flow control, split-brain/quorum, `pxc_strict_mode`, Clone SST. |
 | [`percona-operators-on-k8s`](percona-operators-on-k8s/SKILL.md) | Operators for PXC/MongoDB/PostgreSQL/MySQL: CR patterns, backups, scaling, upgrades - and the per-operator field differences agents hallucinate. |
+| [`postgres-to-percona-pg`](postgres-to-percona-pg/SKILL.md) | Migration from community PostgreSQL to Percona Distribution for PostgreSQL: the package-swap path, pg_tde TDE, pg_stat_monitor, and the Patroni/etcd/HAProxy HA stack. |
+| [`mongodb-to-psmdb`](mongodb-to-psmdb/SKILL.md) | Migration from MongoDB Community or Atlas to Percona Server for MongoDB: in-place swap, the PCSM live-migration tool, FCV, and config gotchas. |
 
 ## Better together: Skills + Percona DK
 
@@ -34,10 +36,7 @@ The skills pair with the [Percona Developer Knowledge MCP server](https://github
 
 ## Roadmap
 
-These are next - open an issue or PR if you'd like to pull one forward:
-
-- `postgres-to-percona-pg` - Migration to Percona Distribution for PostgreSQL.
-- `mongodb-to-psmdb` - Migration to Percona Server for MongoDB.
+The initial roadmap is complete. Ideas for new skills (a Valkey distribution skill, deeper Operator recipes, replication topologies) are welcome - open an issue to propose one, or a PR to add it.
 
 ## Installing
 

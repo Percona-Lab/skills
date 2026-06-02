@@ -1,6 +1,6 @@
 # Testing Percona Skills (internal dogfood)
 
-This is the v0.1 dogfood guide. Anyone with repo access is welcome to try it: get the four skills running in your own AI tool, use them in your real work for a week or so, and tell us what's wrong or missing. The feedback decides whether this becomes a public, supported deliverable or stays an experiment.
+This is the v0.1 dogfood guide. Anyone with repo access is welcome to try it: get the skills running in your own AI tool, use them in your real work for a week or so, and tell us what's wrong or missing. The feedback decides whether this becomes a public, supported deliverable or stays an experiment.
 
 ## 1. Install (with repo access)
 
@@ -12,7 +12,9 @@ git clone git@github.com:Percona-Lab/skills.git ~/code/percona-skills
 
 # Symlink each skill into Claude Code's skill folder
 mkdir -p ~/.claude/skills
-for skill in percona-dk-mcp mysql-to-percona xtrabackup-recipes percona-toolkit-recipes; do
+for skill in percona-dk-mcp mysql-to-percona xtrabackup-recipes percona-toolkit-recipes \
+             pmm-operations psmdb-features pbm-recipes pxc-galera-operations \
+             percona-operators-on-k8s postgres-to-percona-pg mongodb-to-psmdb; do
   ln -s ~/code/percona-skills/$skill ~/.claude/skills/$skill
 done
 ```
@@ -96,6 +98,20 @@ Start a fresh AI session for each. Watch what happens: does the right skill load
 - "Configure scheduled S3 backups for the Percona MongoDB operator."
 - "How do I do a major version upgrade with the Percona PostgreSQL operator?"
 
+### postgres-to-percona-pg
+
+- "How do I migrate my existing PostgreSQL 17 server to Percona Distribution for PostgreSQL?"
+- "Set up Transparent Data Encryption on Percona PostgreSQL with pg_tde and HashiCorp Vault."
+- "What's the difference between pg_stat_monitor and pg_stat_statements?"
+- "What's the recommended HA setup for Percona PostgreSQL?"
+
+### mongodb-to-psmdb
+
+- "How do I migrate a self-hosted MongoDB Community replica set to Percona Server for MongoDB?"
+- "I'm on MongoDB Atlas and want to move to self-hosted PSMDB with no downtime. How?"
+- "After upgrading PSMDB do I need to do anything about feature compatibility version?"
+- "Can I just swap MongoDB Community binaries for PSMDB on the same data directory?"
+
 ### percona-dk-mcp (mostly exercised by the others, but try direct queries too)
 
 - "What changed in Percona Server 8.4.7?"
@@ -124,7 +140,7 @@ DM Dennis on Slack for anything hard to put in an issue.
 After the dogfood window:
 
 - **Flip the repo public** on Percona-Lab if the skills hold up to real-work testing.
-- **Continue investing** in the roadmap (PMM, PSMDB, PBM, PXC, Operators, PG migration, Mongo migration) if it's valuable.
+- **Continue investing** in new skills (Valkey, deeper Operator recipes, replication topologies) if it's valuable.
 - **Pull into a Percona-supported deliverable** if external traction follows publication.
 
 Your feedback drives all three calls.
