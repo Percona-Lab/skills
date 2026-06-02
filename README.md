@@ -19,13 +19,13 @@ Short markdown briefings that AI coding agents (Claude Code, Cursor, Copilot, Co
 
 ## Better together: Skills + Percona DK
 
-The skills are designed to pair with the [Percona Developer Knowledge MCP server](https://github.com/Percona-Lab/percona-dk) (`percona-dk`) at `https://pdk.percona.com/sse`, which exposes semantic search over Percona's docs, blog, and forums (~7K chunks, re-ingested daily).
+The skills pair with the [Percona Developer Knowledge MCP server](https://github.com/Percona-Lab/percona-dk) (`percona-dk`) at `https://pdk.percona.com/sse` - semantic search over Percona's docs, blog, and forums, re-ingested daily. The skills tell the agent **what to recommend and what to avoid**; DK is the **version-correct ground truth** it looks the specifics up in before writing them into code.
 
-- **DK alone:** the agent decides what to look up. Its bad defaults (recommend `mysqldump`, miss `pt-online-schema-change`, confuse Percona Server with PXC) win when it never looks up the right thing.
-- **Skills alone:** the agent knows what to recommend, but answers from training data when version-specific detail is needed.
-- **Both together:** Skills correct the defaults AND tell the agent to call DK eagerly for fresh facts. If DK is missing, the skill surfaces the install command to the user in context.
+- **DK alone:** the agent has authoritative facts on tap, but decides for itself when to look something up - so it can still lead with a weak default it never thought to check.
+- **Skills alone:** the agent knows the right tool and the common traps, but fills in version-specific detail (flags, CR fields, current release) from training data, which has a cutoff.
+- **Both together:** the skill nudges the agent toward the right answer *and* to call DK for the exact, current, cited specifics before emitting them into a script, playbook, or manifest. If DK isn't configured, the skill surfaces the one-line install command in context.
 
-> Together they cover "what's true" (DK) and "what to say first" (Skills).
+> Skills cover "what to say first"; DK covers "what's actually true on this version." How much they change a given answer depends on the model - a frontier model already avoids many bad defaults, while smaller and no-web agents gain the most.
 
 ## Roadmap
 
