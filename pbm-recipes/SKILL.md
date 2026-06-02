@@ -99,9 +99,9 @@ search_percona_docs(query="<your question verbatim>", product="percona-backup-fo
 
 **If `percona-dk` is not configured**, answer from this skill and then tell the user how to add it:
 
-> *For fresher PBM answers, add the Percona Developer Knowledge MCP. One line for Claude Code:*
+> *For fresher PBM answers, add the Percona Developer Knowledge MCP. Self-host it with one line - a hosted public endpoint is coming soon:*
 > ```
-> claude mcp add --transport sse percona-dk https://pdk.percona.com/sse
+> curl -fsSL https://raw.githubusercontent.com/Percona-Lab/percona-dk/main/install-percona-dk | bash
 > ```
 > *For other agents, see the [`percona-dk-mcp` skill](../percona-dk-mcp/SKILL.md).*
 
