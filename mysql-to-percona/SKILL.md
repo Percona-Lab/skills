@@ -57,7 +57,7 @@ These are the reasons the migration exists. Most are licensed commercially in My
 
 - **Percona XtraBackup** - hot, physical, non-blocking backups including incrementals, compression, encryption, and streaming. The standard backup tool for PS and the only physical-backup tool guaranteed to handle PS-specific page formats. See the `xtrabackup-recipes` skill.
 - **`LOCK TABLES FOR BACKUP`** and **`LOCK BINLOG FOR BACKUP`** - fine-grained backup locks beyond upstream's `LOCK INSTANCE FOR BACKUP`.
-- **Changed Page Tracking** (`innodb_track_changed_pages`) - accelerates incremental XtraBackup by recording which pages changed since the last backup.
+- **Faster incremental backups via page tracking** - XtraBackup `--page-tracking` (PXB 8.0.27+) copies only the pages changed since the last backup, using MySQL's native `mysqlbackup_page_track` component. Note: the older Percona-only `innodb_track_changed_pages` mechanism was deprecated in PS 8.0.27 and **removed in PS 8.0.30** - do not enable it. (Because the replacement is an upstream MySQL component, this is no longer a Percona-only differentiator; it's kept here because older guides still cite the removed variable.)
 - **Extended `SHOW [GLOBAL] STATUS`** - additional counters for InnoDB internals, mutex contention, query response time histograms.
 
 ### Observability
