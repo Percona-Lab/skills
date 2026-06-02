@@ -4,7 +4,7 @@ This is the v0.1 dogfood guide. Anyone with repo access is welcome to try it: ge
 
 ## 1. Install (with repo access)
 
-While the repo is private, the public installers (`npx skills add ...`, the raw-content `curl ...`) won't work. Use git clone + symlinks instead:
+The repo is public, so the installers work: `npx skills add Percona-Lab/skills` (interactive) or the raw-content `curl` per the README. For local iteration on the skills themselves, git clone + symlinks is handy:
 
 ```bash
 # Clone once
