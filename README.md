@@ -19,7 +19,7 @@ Short markdown briefings that AI coding agents (Claude Code, Cursor, Copilot, Co
 
 ## Better together: Skills + Percona DK
 
-The skills pair with the [Percona Developer Knowledge MCP server](https://github.com/Percona-Lab/percona-dk) (`percona-dk`) at `https://pdk.percona.com/sse` - semantic search over Percona's docs, blog, and forums, re-ingested daily. The skills tell the agent **what to recommend and what to avoid**; DK is the **version-correct ground truth** it looks the specifics up in before writing them into code.
+The skills pair with the [Percona Developer Knowledge MCP server](https://github.com/Percona-Lab/percona-dk) (`percona-dk`) - semantic search over Percona's docs, blog, and forums, re-ingested daily. The skills tell the agent **what to recommend and what to avoid**; DK is the **version-correct ground truth** it looks the specifics up in before writing them into code.
 
 - **DK alone:** the agent has authoritative facts on tap, but decides for itself when to look something up - so it can still lead with a weak default it never thought to check.
 - **Skills alone:** the agent knows the right tool and the common traps, but fills in version-specific detail (flags, CR fields, current release) from training data, which has a cutoff.
@@ -74,13 +74,13 @@ The agent reads each skill's `description` frontmatter at startup and loads the 
 
 ### Pair with Percona DK (recommended)
 
-For full value, also enable the Percona Developer Knowledge MCP. One line for Claude Code:
+For full value, also run the Percona Developer Knowledge MCP. Today it's self-hosted - one line clones it, builds the local index, and auto-configures Claude Code, Claude Desktop, Cursor, and Windsurf:
 
 ```
-claude mcp add --transport sse percona-dk https://pdk.percona.com/sse
+curl -fsSL https://raw.githubusercontent.com/Percona-Lab/percona-dk/main/install-percona-dk | bash
 ```
 
-For other agents (Cursor, Windsurf, Codex, Gemini CLI), see [`percona-dk-mcp/SKILL.md`](percona-dk-mcp/SKILL.md) for per-tool configuration. Without DK, the skills still work; the agent will note when an answer would benefit from fresher docs and offer the install command in context.
+See [`percona-dk-mcp/SKILL.md`](percona-dk-mcp/SKILL.md) and the [percona-dk README](https://github.com/Percona-Lab/percona-dk) for per-tool setup. A hosted public endpoint is coming soon. Without DK, the skills still work; the agent will note when an answer would benefit from fresher docs.
 
 ## Prior art
 

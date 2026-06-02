@@ -25,10 +25,10 @@ To pick up updates: `git -C ~/code/percona-skills pull`. All symlinks pick up th
 
 ## 2. Enable Percona DK (recommended)
 
-The skills lean on the percona-dk MCP for fresh, version-specific facts. Enable it in Claude Code:
+The skills lean on the percona-dk MCP for fresh, version-specific facts. Today it's self-hosted - one line clones it, builds the local index, and auto-configures Claude Code, Cursor, and Windsurf:
 
 ```bash
-claude mcp add --transport sse percona-dk https://pdk.percona.com/sse
+curl -fsSL https://raw.githubusercontent.com/Percona-Lab/percona-dk/main/install-percona-dk | bash
 ```
 
 For other agents, see [`percona-dk-mcp/SKILL.md`](percona-dk-mcp/SKILL.md) for per-tool configuration. Without DK, the skills still work; the agent will note when an answer would benefit from fresher docs.
