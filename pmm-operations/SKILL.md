@@ -109,8 +109,8 @@ search_percona_docs(query="<your question verbatim>", product="pmm")
 
 ## Sources
 
-- [PMM Documentation](https://docs.percona.com/pmm-doc/latest/)
-- [Setting up the client](https://docs.percona.com/pmm-doc/latest/setting-up/client/index/)
-- [MySQL QAN setup](https://docs.percona.com/pmm-doc/latest/setting-up/client/mysql/) · [MongoDB QAN setup](https://docs.percona.com/pmm-doc/latest/setting-up/client/mongodb/)
-- [Percona Alerting](https://docs.percona.com/pmm-doc/latest/get-started/alerting/)
+- [PMM Documentation](https://docs.percona.com/percona-monitoring-and-management/3/)
+- [Setting up the client](https://docs.percona.com/percona-monitoring-and-management/3/setting-up/client/index/)
+- [MySQL QAN setup](https://docs.percona.com/percona-monitoring-and-management/3/setting-up/client/mysql/) · [MongoDB QAN setup](https://docs.percona.com/percona-monitoring-and-management/3/setting-up/client/mongodb/)
+- [Percona Alerting](https://docs.percona.com/percona-monitoring-and-management/3/get-started/alerting/)
 - [PMM 3 GA announcement](https://forums.percona.com/t/pmm-3-ga-now-available-for-installation-and-technical-review/36418/1)

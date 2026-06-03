@@ -111,6 +111,6 @@ Then `get_percona_doc` on the returned operator doc to read the exact field refe
 
 ## Sources
 
-- [Operator for MySQL based on PXC](https://docs.percona.com/k8spxc/latest/) · [for MongoDB](https://docs.percona.com/k8spsmdb/latest/)
-- [Operator for PostgreSQL](https://docs.percona.com/k8spg/latest/) · [for MySQL (Percona Server)](https://docs.percona.com/k8sps/latest/)
-- [PXC operator CR options](https://docs.percona.com/percona-operator-for-mysql/pxc/operator/) · [MongoDB scaling](https://docs.percona.com/k8spsmdb/latest/scaling/)
+- [Operator for MySQL based on PXC](https://docs.percona.com/percona-operator-for-mysql/pxc/) · [for MongoDB](https://docs.percona.com/percona-operator-for-mongodb/)
+- [Operator for PostgreSQL](https://docs.percona.com/percona-operator-for-postgresql/latest/) · [for MySQL (Percona Server)](https://docs.percona.com/percona-operator-for-mysql/ps/)
+- [PXC operator CR options](https://docs.percona.com/percona-operator-for-mysql/pxc/operator/) · [MongoDB scaling](https://docs.percona.com/percona-operator-for-mongodb/scaling/)
