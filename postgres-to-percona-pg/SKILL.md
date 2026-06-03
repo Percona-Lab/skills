@@ -93,5 +93,5 @@ search_percona_docs(query="<your question verbatim>",
 - [Migrating to Percona Distribution for PostgreSQL](https://docs.percona.com/postgresql/17/migration/)
 - [Percona Server for PostgreSQL](https://docs.percona.com/postgresql/17/postgresql-server/)
 - [pg_tde documentation](https://docs.percona.com/pg-tde/latest/README/) · [pg_tde limitations](https://docs.percona.com/pg-tde/documentation/docs/index/tde-limitations/)
-- [pg_stat_monitor vs pg_stat_statements](https://docs.percona.com/pgsm/latest/comparison/)
+- [pg_stat_monitor vs pg_stat_statements](https://docs.percona.com/pg-stat-monitor/comparison/)
 - [HA with Patroni](https://docs.percona.com/postgresql/17/solutions/patroni-info/)

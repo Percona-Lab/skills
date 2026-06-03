@@ -87,5 +87,5 @@ search_percona_docs(query="<your question verbatim>",
 - [Upgrade from MongoDB Community to PSMDB](https://docs.percona.com/percona-server-for-mongodb/8.0/install/upgrade-from-mongodb/)
 - [PSMDB vs MongoDB Community comparison](https://docs.percona.com/percona-server-for-mongodb/8.0/comparison/)
 - [Upgrade 7.0 → 8.0 and FCV](https://docs.percona.com/percona-server-for-mongodb/8.0/install/upgrade-from-70/)
-- [Percona ClusterSync for MongoDB (PCSM)](https://docs.percona.com/pcsm/latest/intro/) · [PCSM limitations](https://docs.percona.com/pcsm/latest/limitations/)
+- [Percona ClusterSync for MongoDB (PCSM)](https://docs.percona.com/percona-clustersync-for-mongodb/intro/) · [PCSM limitations](https://docs.percona.com/percona-clustersync-for-mongodb/limitations/)
 - See also the [`psmdb-features`](../psmdb-features/SKILL.md) skill for what PSMDB adds once you've migrated.

@@ -117,8 +117,8 @@ search_percona_docs(query="<your question verbatim>", product="percona-backup-fo
 
 ## Sources
 
-- [PBM architecture](https://docs.percona.com/pbm/latest/details/architecture/)
-- [pbm command reference](https://docs.percona.com/pbm/latest/reference/pbm-commands/)
-- [Point-in-time recovery](https://docs.percona.com/pbm/latest/features/point-in-time-recovery/)
-- [Physical restore](https://docs.percona.com/pbm/latest/usage/restore-physical/) · [Selective backup](https://docs.percona.com/pbm/latest/features/selective-backup/)
-- [Version compatibility](https://docs.percona.com/pbm/latest/details/versions/)
+- [PBM architecture](https://docs.percona.com/percona-backup-mongodb/details/architecture/)
+- [pbm command reference](https://docs.percona.com/percona-backup-mongodb/reference/pbm-commands/)
+- [Point-in-time recovery](https://docs.percona.com/percona-backup-mongodb/features/point-in-time-recovery/)
+- [Physical restore](https://docs.percona.com/percona-backup-mongodb/usage/restore-physical/) · [Selective backup](https://docs.percona.com/percona-backup-mongodb/features/selective-backup/)
+- [Version compatibility](https://docs.percona.com/percona-backup-mongodb/details/versions/)
