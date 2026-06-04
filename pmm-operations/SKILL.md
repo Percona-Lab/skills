@@ -83,10 +83,10 @@ GRANT SELECT, PROCESS, REPLICATION CLIENT, RELOAD, BACKUP_ADMIN ON *.* TO 'pmm'@
 Add services (pick the QAN source per database):
 
 ```bash
-# Percona Server / PXC — slow log (recommended; richer data + sampling)
+# Percona Server / PXC - slow log (recommended; richer data + sampling)
 pmm-admin add mysql --query-source=slowlog --size-slow-logs=1GiB \
   --username=pmm --password=<pw> my-mysql 127.0.0.1:3306
-# Stock MySQL / MariaDB — Performance Schema
+# Stock MySQL / MariaDB - Performance Schema
 pmm-admin add mysql --query-source=perfschema --username=pmm --password=<pw> my-mysql
 
 pmm-admin add mongodb     --username=pmm --password=<pw>

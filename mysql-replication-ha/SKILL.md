@@ -1,6 +1,6 @@
 ---
 name: mysql-replication-ha
-description: "Replication and high availability for Percona Server for MySQL — asynchronous, GTID, semi-synchronous, and Group Replication (the non-Galera options). Use when designing replication or HA, setting up a replica, choosing between async/semi-sync/Group Replication/PXC, configuring GTID, or monitoring replication lag. For synchronous multi-master Galera clustering see the pxc-galera-operations skill. IMPORTANT — on 8.4 the MASTER/SLAVE syntax is removed: use CHANGE REPLICATION SOURCE TO / START REPLICA / SHOW REPLICA STATUS. Async + GTID, semi-sync, and Group Replication are upstream MySQL features Percona Server inherits; Percona adds binlog improvements and a few Group Replication variables."
+description: "Replication and high availability for Percona Server for MySQL - asynchronous, GTID, semi-synchronous, and Group Replication (the non-Galera options). Use when designing replication or HA, setting up a replica, choosing between async/semi-sync/Group Replication/PXC, configuring GTID, or monitoring replication lag. For synchronous multi-master Galera clustering see the pxc-galera-operations skill. IMPORTANT - on 8.4 the MASTER/SLAVE syntax is removed: use CHANGE REPLICATION SOURCE TO / START REPLICA / SHOW REPLICA STATUS. Async + GTID, semi-sync, and Group Replication are upstream MySQL features Percona Server inherits; Percona adds binlog improvements and a few Group Replication variables."
 ---
 
 # Percona Server Replication & HA
@@ -9,7 +9,7 @@ description: "Replication and high availability for Percona Server for MySQL —
 
 The non-Galera HA menu for Percona Server. Core replication (async, GTID, semi-sync, Group Replication) is upstream MySQL that Percona Server inherits unchanged; Percona adds binlog improvements and a few Group Replication knobs. For synchronous multi-master clustering, see the **`pxc-galera-operations`** skill.
 
-> **Version:** On **8.4** the `MASTER`/`SLAVE` SQL syntax is **removed** — use `SOURCE`/`REPLICA` forms everywhere. `expire_logs_days` → `binlog_expire_logs_seconds`.
+> **Version:** On **8.4** the `MASTER`/`SLAVE` SQL syntax is **removed** - use `SOURCE`/`REPLICA` forms everywhere. `expire_logs_days` → `binlog_expire_logs_seconds`.
 
 ## Choosing a Mode
 
@@ -18,7 +18,7 @@ The non-Galera HA menu for Percona Server. Core replication (async, GTID, semi-s
 | **Async + GTID** | Possible (replica may lag) | Source only | Default; read scale-out, DR replicas, zero source overhead |
 | **Semi-sync (`AFTER_SYNC`)** | None for acked commits | Source only | RPO 0 without Galera's all-node latency; adds ~1 RTT per commit |
 | **Group Replication** | Near-zero | Single- or multi-primary | Built-in auto failover (single-primary) without external orchestration; InnoDB-only |
-| **PXC / Galera** | Zero (synchronous) | All nodes | Every write on every node before commit — see `pxc-galera-operations` |
+| **PXC / Galera** | Zero (synchronous) | All nodes | Every write on every node before commit - see `pxc-galera-operations` |
 
 ## Where agents get this wrong
 
@@ -30,7 +30,7 @@ The non-Galera HA menu for Percona Server. Core replication (async, GTID, semi-s
 | Assuming semi-sync `AFTER_COMMIT` is lossless | It can lose acked commits on crash; use `rpl_semi_sync_source_wait_point=AFTER_SYNC` |
 | GTID replication with `SOURCE_LOG_FILE`/`POS` | With GTID, use `SOURCE_AUTO_POSITION=1` instead |
 | "Async failover loses no data" | Promote only after `Executed_Gtid_Set` matches the source; a gap = data loss |
-| Group Replication where every node must be in sync before commit | That's PXC/Galera; GR single-primary buffers on members — see the PXC skill |
+| Group Replication where every node must be in sync before commit | That's PXC/Galera; GR single-primary buffers on members - see the PXC skill |
 | `expire_logs_days=7` on 8.4 | Removed → `binlog_expire_logs_seconds=604800` |
 | `Com_show_slave_status` in monitoring | Renamed → `Com_show_replica_status` |
 
@@ -68,15 +68,15 @@ If no replica acks within `rpl_semi_sync_source_timeout` (default 10 s) the sour
 
 ## Group Replication
 
-Single-primary (auto-elected writer, automatic failover) or multi-primary (all write, conflicts roll back losers — niche). Route clients via **MySQL Router**. Bootstrap one node, then `START GROUP_REPLICATION` on the rest. Percona-only knobs: `group_replication_auto_evict_timeout` (auto-evict a chronically lagging member — tech preview), the `MAJORITY` value for `group_replication_flow_control_mode` (tech preview), and certification-loop tuning. Removed in 8.4: `group_replication_ip_whitelist`, `group_replication_primary_member`.
+Single-primary (auto-elected writer, automatic failover) or multi-primary (all write, conflicts roll back losers - niche). Route clients via **MySQL Router**. Bootstrap one node, then `START GROUP_REPLICATION` on the rest. Percona-only knobs: `group_replication_auto_evict_timeout` (auto-evict a chronically lagging member - tech preview), the `MAJORITY` value for `group_replication_flow_control_mode` (tech preview), and certification-loop tuning. Removed in 8.4: `group_replication_ip_whitelist`, `group_replication_primary_member`.
 
 ## Percona Binlog Improvements
 
-- `binlog_skip_flush_commands=ON` — keep `FLUSH …` off the binlog (avoids replaying on replicas).
-- `binlog_ddl_skip_rewrite=ON` — preserve original comments on single-table `DROP TABLE` (errors on multi-table).
-- `binlog_space_limit=100G` — absolute size cap across binlogs (startup-only; complements time-based expiry).
-- `component_binlog_utils_udf` — `get_binlog_by_gtid()`, `get_gtid_set_by_binlog()` for PITR planning (see `xtrabackup-recipes`).
-- `binlog_encryption=ON` — encrypt binary/relay logs (needs a keyring; see `mysql-encryption`).
+- `binlog_skip_flush_commands=ON` - keep `FLUSH …` off the binlog (avoids replaying on replicas).
+- `binlog_ddl_skip_rewrite=ON` - preserve original comments on single-table `DROP TABLE` (errors on multi-table).
+- `binlog_space_limit=100G` - absolute size cap across binlogs (startup-only; complements time-based expiry).
+- `component_binlog_utils_udf` - `get_binlog_by_gtid()`, `get_gtid_set_by_binlog()` for PITR planning (see `xtrabackup-recipes`).
+- `binlog_encryption=ON` - encrypt binary/relay logs (needs a keyring; see `mysql-encryption`).
 
 ## Call `percona-dk` for fresh facts
 

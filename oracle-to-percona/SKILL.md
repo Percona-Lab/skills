@@ -1,13 +1,13 @@
 ---
 name: oracle-to-percona
-description: "Migrating from Oracle Database to Percona Server for MySQL. Use when porting an Oracle schema, PL/SQL, or application to Percona Server / MySQL, mapping Oracle data types, or rewriting Oracle SQL constructs. IMPORTANT — unlike MariaDB (which has sql_mode=ORACLE and PL/SQL compatibility), MySQL and Percona Server have NO Oracle compatibility mode. Oracle→Percona is a genuine schema-and-code rewrite, not a compatibility-mode switch: PL/SQL packages, ROWNUM, CONNECT BY, sequences, (+) joins, and empty-string=NULL semantics all need rewriting. Recursive CTEs and window functions require MySQL/Percona 8.0+."
+description: "Migrating from Oracle Database to Percona Server for MySQL. Use when porting an Oracle schema, PL/SQL, or application to Percona Server / MySQL, mapping Oracle data types, or rewriting Oracle SQL constructs. IMPORTANT - unlike MariaDB (which has sql_mode=ORACLE and PL/SQL compatibility), MySQL and Percona Server have NO Oracle compatibility mode. Oracle→Percona is a genuine schema-and-code rewrite, not a compatibility-mode switch: PL/SQL packages, ROWNUM, CONNECT BY, sequences, (+) joins, and empty-string=NULL semantics all need rewriting. Recursive CTEs and window functions require MySQL/Percona 8.0+."
 ---
 
 # Oracle to Percona Server for MySQL
 
 *Last updated: 2026-05-27*
 
-Migrating from Oracle to Percona Server is a **real rewrite**, not a switch. Crucially — unlike MariaDB, which offers `sql_mode=ORACLE` with substantial PL/SQL compatibility — **MySQL and Percona Server have no Oracle compatibility mode at all**: no `sql_mode=ORACLE`, no PL/SQL parser, no packages, no `%TYPE`/`%ROWTYPE`, no `:=`. Schema, stored code, and Oracle-specific SQL must be translated by hand (with tooling assist). Percona Server adds instrumentation/encryption/tooling on top of MySQL — it does not add Oracle syntax.
+Migrating from Oracle to Percona Server is a **real rewrite**, not a switch. Crucially - unlike MariaDB, which offers `sql_mode=ORACLE` with substantial PL/SQL compatibility - **MySQL and Percona Server have no Oracle compatibility mode at all**: no `sql_mode=ORACLE`, no PL/SQL parser, no packages, no `%TYPE`/`%ROWTYPE`, no `:=`. Schema, stored code, and Oracle-specific SQL must be translated by hand (with tooling assist). Percona Server adds instrumentation/encryption/tooling on top of MySQL - it does not add Oracle syntax.
 
 > **Version:** Recursive CTEs (for `CONNECT BY`), window functions, roles, and JSON all need MySQL/Percona **8.0+**. `PERCONA_SEQUENCE_TABLE()` is the preferred form from 8.4 (replaces the deprecated `SEQUENCE_TABLE()`).
 
@@ -19,13 +19,13 @@ Migrating from Oracle to Percona Server is a **real rewrite**, not a switch. Cru
 | Oracle `DATE` → MySQL `DATE` | Oracle `DATE` carries time-of-day → map to `DATETIME` |
 | `WHERE ROWNUM <= 10` | `LIMIT 10` |
 | `START WITH … CONNECT BY` | `WITH RECURSIVE` CTE (8.0+) |
-| Treating `''` as `NULL` (Oracle semantics) | MySQL keeps `''` distinct from `NULL` — audit `IS NULL` checks; no `EMPTY_STRING_IS_NULL` mode exists |
+| Treating `''` as `NULL` (Oracle semantics) | MySQL keeps `''` distinct from `NULL` - audit `IS NULL` checks; no `EMPTY_STRING_IS_NULL` mode exists |
 | `NVL(a,b)`, `DECODE(...)` | `IFNULL(a,b)`/`COALESCE`; `CASE … WHEN … END` |
 | `SYSDATE` for statement time | `NOW()` (MySQL `SYSDATE()` returns invocation time, differs inside routines) |
 | `a (+) = b` outer-join syntax | Standard `LEFT JOIN … ON …` |
 | `CREATE OR REPLACE PROCEDURE` | `DROP PROCEDURE IF EXISTS` + `CREATE PROCEDURE` |
 | `NUMBER` (no precision) for money | Bare `NUMBER`→`DOUBLE` (approximate); use `DECIMAL(p,s)` for exact |
-| `CREATE SEQUENCE` like MariaDB | MySQL has none — use `AUTO_INCREMENT` or a sequence-emulation table |
+| `CREATE SEQUENCE` like MariaDB | MySQL has none - use `AUTO_INCREMENT` or a sequence-emulation table |
 | `MERGE INTO …` | `INSERT … ON DUPLICATE KEY UPDATE` |
 
 ## Data Type Mapping
@@ -41,7 +41,7 @@ Migrating from Oracle to Percona Server is a **real rewrite**, not a switch. Cru
 | `RAW(n)` | `VARBINARY(n)` | |
 | `DATE` | `DATETIME` | Oracle DATE = date+time |
 | `TIMESTAMP` | `DATETIME(6)` | `TIMESTAMP` capped at 2038 |
-| `TIMESTAMP WITH TIME ZONE` | `DATETIME` + offset col | no native TZ type — store UTC |
+| `TIMESTAMP WITH TIME ZONE` | `DATETIME` + offset col | no native TZ type - store UTC |
 | `INTERVAL …` | `INT` months / `BIGINT` µs | no native interval type |
 | `ROWID` | (none) | redesign to use the PK |
 | `XMLTYPE` | `JSON` or `LONGTEXT` | MySQL has native JSON |
@@ -65,16 +65,16 @@ Migrating from Oracle to Percona Server is a **real rewrite**, not a switch. Cru
   SELECT * FROM org;
   ```
 - **Triggers** → `:NEW`/`:OLD`→`NEW`/`OLD`; `FOR EACH ROW` only (no statement-level); fold `WHEN(...)` into an `IF` in the body.
-- **`DBMS_*`** → app code or MySQL equivalents (`DBMS_SCHEDULER`→Event Scheduler; `DBMS_OUTPUT`→logging). `INSERT ALL`, `FORALL`, `BULK COLLECT`, pipelined `TABLE()`, `CREATE SYNONYM`, object types — all need redesign.
-- **Autocommit** differs: Oracle is OFF by default, MySQL is **ON** — use explicit `START TRANSACTION` where you relied on manual commit.
+- **`DBMS_*`** → app code or MySQL equivalents (`DBMS_SCHEDULER`→Event Scheduler; `DBMS_OUTPUT`→logging). `INSERT ALL`, `FORALL`, `BULK COLLECT`, pipelined `TABLE()`, `CREATE SYNONYM`, object types - all need redesign.
+- **Autocommit** differs: Oracle is OFF by default, MySQL is **ON** - use explicit `START TRANSACTION` where you relied on manual commit.
 
 ## Tooling
 
-No 100% converter exists; budget for manual rewrite of procedural code. Common aids: **AWS Schema Conversion Tool** (best assessment report for scoping), **MySQL Workbench Migration Wizard**, **SQLines**. The Percona docs have no dedicated Oracle-migration guide — most of this is general Oracle→MySQL knowledge; Percona Professional Services offers paid migrations. After migrating, Percona's extra instrumentation (see `percona-server-features`, `mysql-query-optimization`) helps catch post-migration regressions.
+No 100% converter exists; budget for manual rewrite of procedural code. Common aids: **AWS Schema Conversion Tool** (best assessment report for scoping), **MySQL Workbench Migration Wizard**, **SQLines**. The Percona docs have no dedicated Oracle-migration guide - most of this is general Oracle→MySQL knowledge; Percona Professional Services offers paid migrations. After migrating, Percona's extra instrumentation (see `percona-server-features`, `mysql-query-optimization`) helps catch post-migration regressions.
 
 ## Call `percona-dk` for fresh facts
 
-Oracle→MySQL migration is largely general MySQL knowledge, but the Percona-specific landing spots — sequence emulation on 8.4, the features you gain post-migration, current data-type behavior — are documented at docs.percona.com. For any version-specific question ("is `PERCONA_SEQUENCE_TABLE()` available on my build?", current type semantics, recent release notes) **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
+Oracle→MySQL migration is largely general MySQL knowledge, but the Percona-specific landing spots - sequence emulation on 8.4, the features you gain post-migration, current data-type behavior - are documented at docs.percona.com. For any version-specific question ("is `PERCONA_SEQUENCE_TABLE()` available on my build?", current type semantics, recent release notes) **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
 
 ```
 search_percona_docs(query="<your question verbatim>",
@@ -96,6 +96,6 @@ Pass `version="8.0"` for the older LTS line.
 
 - [Feature comparison (Percona vs MySQL)](https://docs.percona.com/percona-server/8.4/feature-comparison.html) · [stored procedures](https://docs.percona.com/percona-server/8.4/stored-procedures.html) · [data types](https://docs.percona.com/percona-server/8.4/data-types-basic.html)
 - Upstream: [WITH RECURSIVE](https://dev.mysql.com/doc/refman/8.4/en/with.html) · [stored programs](https://dev.mysql.com/doc/refman/8.4/en/stored-programs-defining.html) · [Workbench migration](https://dev.mysql.com/doc/workbench/en/wb-migration-overview.html)
-- [AWS SCT — Oracle to MySQL](https://docs.aws.amazon.com/SchemaConversionTool/latest/userguide/CHAP_Source.Oracle.html)
+- [AWS SCT - Oracle to MySQL](https://docs.aws.amazon.com/SchemaConversionTool/latest/userguide/CHAP_Source.Oracle.html)
 
 *Much of Oracle→MySQL migration is general MySQL knowledge, not Percona-specific. For Percona features you gain, see `percona-server-features`.*

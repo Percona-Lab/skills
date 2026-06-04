@@ -1,13 +1,13 @@
 ---
 name: mysql-query-optimization
-description: "Diagnosing slow queries and designing indexes on Percona Server for MySQL, using its extra instrumentation. Use when investigating slow MySQL/Percona Server queries, deciding which indexes to add or drop, analyzing a slow query log, finding unused or redundant indexes, or tuning query performance. IMPORTANT — Percona Server adds per-table/per-index/per-user counters (userstat) and an extended slow query log (log_slow_verbosity) that stock MySQL lacks; use these plus pt-query-digest and PMM Query Analytics instead of guessing or hand-parsing logs. EXPLAIN ANALYZE, optimizer histograms, and invisible indexes are inherited from upstream MySQL 8.0+."
+description: "Diagnosing slow queries and designing indexes on Percona Server for MySQL, using its extra instrumentation. Use when investigating slow MySQL/Percona Server queries, deciding which indexes to add or drop, analyzing a slow query log, finding unused or redundant indexes, or tuning query performance. IMPORTANT - Percona Server adds per-table/per-index/per-user counters (userstat) and an extended slow query log (log_slow_verbosity) that stock MySQL lacks; use these plus pt-query-digest and PMM Query Analytics instead of guessing or hand-parsing logs. EXPLAIN ANALYZE, optimizer histograms, and invisible indexes are inherited from upstream MySQL 8.0+."
 ---
 
 # Query Optimization on Percona Server for MySQL
 
 *Last updated: 2026-05-26*
 
-Percona Server extends MySQL's diagnostics at every layer: `userstat` adds live per-index/per-table/per-user counters to `INFORMATION_SCHEMA`; the extended slow query log (`log_slow_verbosity`) records rows examined, query-plan flags, and InnoDB I/O per query. These feed `pt-query-digest` and PMM Query Analytics. The result is far more signal than stock MySQL `EXPLAIN` alone. Generic indexing principles still apply — but on Percona Server you can *measure* instead of guess.
+Percona Server extends MySQL's diagnostics at every layer: `userstat` adds live per-index/per-table/per-user counters to `INFORMATION_SCHEMA`; the extended slow query log (`log_slow_verbosity`) records rows examined, query-plan flags, and InnoDB I/O per query. These feed `pt-query-digest` and PMM Query Analytics. The result is far more signal than stock MySQL `EXPLAIN` alone. Generic indexing principles still apply - but on Percona Server you can *measure* instead of guess.
 
 > **Versions:** `userstat` and the extended slow log are Percona Server features (8.0+, 8.4+). `EXPLAIN ANALYZE` (8.0.18+), `EXPLAIN FORMAT=TREE` (8.0.16+), optimizer histograms (8.0+), and invisible indexes (8.0+) are inherited from upstream MySQL.
 
@@ -15,15 +15,15 @@ Percona Server extends MySQL's diagnostics at every layer: `userstat` adds live 
 
 | What you might see | What's correct |
 |---|---|
-| `grep`/`awk` over the slow log to find slow queries | Run `pt-query-digest slow.log` — it fingerprints, aggregates, and ranks by total time across all events |
+| `grep`/`awk` over the slow log to find slow queries | Run `pt-query-digest slow.log` - it fingerprints, aggregates, and ranks by total time across all events |
 | Leaving `log_slow_verbosity` at its empty default | Set `log_slow_verbosity='standard,innodb'` (or `'full'`) to capture rows examined, plan flags, and InnoDB I/O per query |
 | "`Rows_examined ≫ Rows_sent`, so add an index" with nothing else | Confirm with the plan flags (`Full_scan: Yes`) and `InnoDB_pages_distinct` in the extended slow log before acting |
 | Dropping an index because it "looks unused" in code | Enable `userstat`, run a representative workload, then check `INFORMATION_SCHEMA.INDEX_STATISTICS WHERE ROWS_READ = 0` |
-| Dropping the index immediately after that check | First mark it `INVISIBLE`, monitor for days, then drop — instant rollback if something regresses |
+| Dropping the index immediately after that check | First mark it `INVISIBLE`, monitor for days, then drop - instant rollback if something regresses |
 | Eyeballing `SHOW CREATE TABLE` for redundant indexes | `pt-duplicate-key-checker` finds prefix-redundant and clustered-key-redundant indexes and estimates wasted bytes |
-| `OFFSET` pagination: `LIMIT 10000, 20` | Keyset pagination: `WHERE id > :cursor ORDER BY id LIMIT 20` — uses the index instead of scanning+discarding |
-| `EXPLAIN` only | `EXPLAIN ANALYZE` (8.0.18+) runs the query and shows **actual** vs estimated rows — exposes bad cardinality estimates |
-| Ignoring write cost when adding indexes | Watch `TABLE_STATISTICS.ROWS_CHANGED_X_INDEXES / ROWS_CHANGED` — a high ratio means each write maintains many indexes |
+| `OFFSET` pagination: `LIMIT 10000, 20` | Keyset pagination: `WHERE id > :cursor ORDER BY id LIMIT 20` - uses the index instead of scanning+discarding |
+| `EXPLAIN` only | `EXPLAIN ANALYZE` (8.0.18+) runs the query and shows **actual** vs estimated rows - exposes bad cardinality estimates |
+| Ignoring write cost when adding indexes | Watch `TABLE_STATISTICS.ROWS_CHANGED_X_INDEXES / ROWS_CHANGED` - a high ratio means each write maintains many indexes |
 
 ## Find Unused & Redundant Indexes
 
@@ -39,8 +39,8 @@ WHERE ROWS_READ = 0 AND INDEX_NAME <> 'PRIMARY'
 ORDER BY TABLE_SCHEMA, TABLE_NAME;
 ```
 Counters reset on `FLUSH INDEX_STATISTICS` or restart; `INDEX_STATISTICS` does not cover partitioned tables. Complementary tools (see `percona-toolkit-recipes`):
-- **`pt-index-usage`** — replays a slow log, EXPLAINs each query, prints `DROP INDEX` for indexes the optimizer never chose. Use a log window covering *all* access patterns (peak, batch, reporting).
-- **`pt-duplicate-key-checker`** — structural redundancy from `SHOW CREATE TABLE`, no workload needed.
+- **`pt-index-usage`** - replays a slow log, EXPLAINs each query, prints `DROP INDEX` for indexes the optimizer never chose. Use a log window covering *all* access patterns (peak, batch, reporting).
+- **`pt-duplicate-key-checker`** - structural redundancy from `SHOW CREATE TABLE`, no workload needed.
 
 ## Extended Slow Query Log
 
@@ -61,14 +61,14 @@ long_query_time = 1
 log_slow_verbosity = standard,innodb
 slow_query_log_use_global_control = all
 ```
-A `full` entry adds `Full_scan/Full_join/Filesort` flags and `InnoDB_IO_r_ops`, `InnoDB_pages_distinct` (unique buffer-pool pages touched — a direct I/O-pressure measure absent from stock MySQL). Feed it straight to:
+A `full` entry adds `Full_scan/Full_join/Filesort` flags and `InnoDB_IO_r_ops`, `InnoDB_pages_distinct` (unique buffer-pool pages touched - a direct I/O-pressure measure absent from stock MySQL). Feed it straight to:
 ```bash
 pt-query-digest /var/lib/mysql/slow.log              # ranked by total time
 pt-query-digest --filter '$event->{Full_scan} eq "Yes"' slow.log
 ```
 For continuous, always-on query analysis, PMM Query Analytics consumes the same slow log live (see `pmm-operations`).
 
-## User Statistics — Hot Tables & Users
+## User Statistics - Hot Tables & Users
 
 ```sql
 SET GLOBAL userstat = ON;
@@ -84,19 +84,19 @@ Also: `CLIENT_STATISTICS` (per IP), `THREAD_STATISTICS` (needs `thread_statistic
 
 ## EXPLAIN & Optimizer (inherited from MySQL 8.0+)
 
-- **`EXPLAIN ANALYZE`** (8.0.18+) — executes and reports actual rows/loops/time vs estimates.
-- **`EXPLAIN FORMAT=TREE`** (8.0.16+) / `FORMAT=JSON` — readable iterator tree with costs.
-- **Histograms** — for skewed, non-indexed columns used in `WHERE`:
+- **`EXPLAIN ANALYZE`** (8.0.18+) - executes and reports actual rows/loops/time vs estimates.
+- **`EXPLAIN FORMAT=TREE`** (8.0.16+) / `FORMAT=JSON` - readable iterator tree with costs.
+- **Histograms** - for skewed, non-indexed columns used in `WHERE`:
   ```sql
   ANALYZE TABLE orders UPDATE HISTOGRAM ON status, region WITH 200 BUCKETS;
   ```
   (Percona Server 8.4.0-1+ auto-refreshes histograms on `ANALYZE TABLE`.)
-- **Invisible indexes** — test-before-drop safely:
+- **Invisible indexes** - test-before-drop safely:
   ```sql
   ALTER TABLE t ALTER INDEX idx INVISIBLE;   -- maintained but ignored by optimizer
   -- monitor, then DROP, or set VISIBLE to restore
   ```
-- **`EXPLAIN FOR CONNECTION <id>`** (5.7+) — plan a query already running.
+- **`EXPLAIN FOR CONNECTION <id>`** (5.7+) - plan a query already running.
 
 ## Indexing & Pagination Principles (general MySQL)
 

@@ -56,7 +56,7 @@ xtrabackup --backup --target-dir=/var/backups/full-$(date +%F) \
 # 2. prepare (decompress first if you used --compress)
 xtrabackup --prepare --target-dir=/var/backups/full-2026-05-29
 
-# 3. restore — server STOPPED, datadir EMPTY
+# 3. restore - server STOPPED, datadir EMPTY
 xtrabackup --copy-back --target-dir=/var/backups/full-2026-05-29
 chown -R mysql:mysql /var/lib/mysql
 ```

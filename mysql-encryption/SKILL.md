@@ -1,13 +1,13 @@
 ---
 name: mysql-encryption
-description: "Data-at-rest encryption and keyring management in Percona Server for MySQL. Use when encrypting InnoDB tablespaces, binary/relay logs, redo/undo logs, or temporary files; choosing or configuring a keyring (file, HashiCorp Vault, KMIP, AWS KMS); rotating the master key; or verifying what is encrypted. IMPORTANT — Percona Server provides binary-log encryption, temp-file encryption, and the Vault/KMIP/AWS-KMS keyrings in the OPEN-SOURCE build (these are MySQL Enterprise-only upstream). Encryption uses a two-tier master-key→tablespace-key hierarchy; the keyring must be loaded at startup BEFORE encrypted redo logs or binlogs can open, or the server won't start. Use keyring COMPONENTS, not the removed legacy plugins."
+description: "Data-at-rest encryption and keyring management in Percona Server for MySQL. Use when encrypting InnoDB tablespaces, binary/relay logs, redo/undo logs, or temporary files; choosing or configuring a keyring (file, HashiCorp Vault, KMIP, AWS KMS); rotating the master key; or verifying what is encrypted. IMPORTANT - Percona Server provides binary-log encryption, temp-file encryption, and the Vault/KMIP/AWS-KMS keyrings in the OPEN-SOURCE build (these are MySQL Enterprise-only upstream). Encryption uses a two-tier master-key→tablespace-key hierarchy; the keyring must be loaded at startup BEFORE encrypted redo logs or binlogs can open, or the server won't start. Use keyring COMPONENTS, not the removed legacy plugins."
 ---
 
 # Percona Server Encryption & Keyring
 
 *Last updated: 2026-05-27*
 
-Percona Server encrypts data at rest with a **two-tier key hierarchy**: a per-instance **master key** wraps each tablespace's **tablespace key**, which encrypts data pages (decrypted at the I/O layer — the buffer pool holds plaintext). This makes master-key rotation cheap (re-wrap keys, don't re-encrypt data). Percona ships several capabilities that are Enterprise-only in upstream MySQL: binary/relay-log encryption, temp-file encryption, and the Vault/KMIP/AWS-KMS keyrings.
+Percona Server encrypts data at rest with a **two-tier key hierarchy**: a per-instance **master key** wraps each tablespace's **tablespace key**, which encrypts data pages (decrypted at the I/O layer - the buffer pool holds plaintext). This makes master-key rotation cheap (re-wrap keys, don't re-encrypt data). Percona ships several capabilities that are Enterprise-only in upstream MySQL: binary/relay-log encryption, temp-file encryption, and the Vault/KMIP/AWS-KMS keyrings.
 
 > **Versions:** Keyring **components** (not the removed `keyring_file` plugin) are the supported model on 8.0+/8.4. Verify with `SELECT * FROM performance_schema.keyring_component_status;`. The keyring must load at startup before any encrypted redo log or binlog opens.
 
@@ -15,15 +15,15 @@ Percona Server encrypts data at rest with a **two-tier key hierarchy**: a per-in
 
 | What you might see | What's correct |
 |---|---|
-| "Binary-log encryption / Vault keyring needs MySQL Enterprise" | All open-source in Percona Server — `binlog_encryption`, plus the Vault, KMIP, and AWS KMS keyring components |
-| `--early-plugin-load=keyring_file.so` on 8.4 | The legacy plugin is gone — use `component_keyring_file` via the `mysqld.my` manifest |
+| "Binary-log encryption / Vault keyring needs MySQL Enterprise" | All open-source in Percona Server - `binlog_encryption`, plus the Vault, KMIP, and AWS KMS keyring components |
+| `--early-plugin-load=keyring_file.so` on 8.4 | The legacy plugin is gone - use `component_keyring_file` via the `mysqld.my` manifest |
 | Putting keyring settings in `my.cnf` `[mysqld]` | Components are configured in a JSON `.cnf` in the plugin dir; the `mysqld.my` manifest declares which to load |
-| Assuming `ENCRYPTION='Y'` on a table also encrypts binlogs | Independent — table uses the tablespace master key; binlogs need `binlog_encryption=ON` (separate key) |
-| `SET GLOBAL innodb_redo_log_encrypt=ON` and expecting it to persist | Lost on restart — set it in `my.cnf`. It only affects newly written pages, not existing ones |
+| Assuming `ENCRYPTION='Y'` on a table also encrypts binlogs | Independent - table uses the tablespace master key; binlogs need `binlog_encryption=ON` (separate key) |
+| `SET GLOBAL innodb_redo_log_encrypt=ON` and expecting it to persist | Lost on restart - set it in `my.cnf`. It only affects newly written pages, not existing ones |
 | Forgetting the keyring at startup when redo logs are encrypted | InnoDB can't scan encrypted redo → normal restart fails. Keyring must be available first |
-| Enabling two keyring components "for redundancy" | Only **one** keyring per instance — multiple may cause data loss |
+| Enabling two keyring components "for redundancy" | Only **one** keyring per instance - multiple may cause data loss |
 | Rotating the master key by deleting/replacing the keyring file | Destroys access to all encrypted data. Use `ALTER INSTANCE ROTATE INNODB MASTER KEY` |
-| Switching plugin→component without migrating keys | Existing encrypted tables become unreadable — migrate keys first (`mysql_migrate_keyring`) |
+| Switching plugin→component without migrating keys | Existing encrypted tables become unreadable - migrate keys first (`mysql_migrate_keyring`) |
 | Trusting `INFORMATION_SCHEMA` to prove on-disk encryption | It reports the *setting*, not that every page is ciphertext |
 
 ## Keyring Backends (choose one)
@@ -31,15 +31,15 @@ Percona Server encrypts data at rest with a **two-tier key hierarchy**: a per-in
 Each backend uses a manifest `mysqld.my` (next to the `mysqld` binary) plus a `.cnf` in the plugin dir. **Only one keyring per instance.**
 
 ```json
-// mysqld.my — declare the component
+// mysqld.my - declare the component
 { "components": "file://component_keyring_file" }
 ```
 | Backend | Component | Use when |
 |---|---|---|
-| File | `component_keyring_file` | Dev / single host. The file is a single point of failure — its loss = unrecoverable data |
+| File | `component_keyring_file` | Dev / single host. The file is a single point of failure - its loss = unrecoverable data |
 | HashiCorp Vault | `component_keyring_vault` | Production, central key management + audit. Needs Vault URL/token/CA; one mount point per server |
-| KMIP | `component_keyring_kmip` | Enterprise KMS (Thales, Fortanix, Vault Enterprise KMIP) — `server_addr`/`port` + client/server certs |
-| AWS KMS | `component_keyring_kms` | AWS workloads — `region`, `kms_key`, AWS credentials |
+| KMIP | `component_keyring_kmip` | Enterprise KMS (Thales, Fortanix, Vault Enterprise KMIP) - `server_addr`/`port` + client/server certs |
+| AWS KMS | `component_keyring_kms` | AWS workloads - `region`, `kms_key`, AWS credentials |
 
 ```json
 // <plugin_dir>/component_keyring_vault.cnf
@@ -86,7 +86,7 @@ SELECT * FROM performance_schema.keyring_component_status;
 
 ## Call `percona-dk` for fresh facts
 
-Keyring component config (Vault/KMIP/AWS KMS `.cnf` keys), the encryption variables, and the plugin→component migration path are version-sensitive and Percona-specific — documented at docs.percona.com, not the upstream manual. For any version-specific question (current component config keys, a startup failure with encrypted redo logs, migration steps) **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
+Keyring component config (Vault/KMIP/AWS KMS `.cnf` keys), the encryption variables, and the plugin→component migration path are version-sensitive and Percona-specific - documented at docs.percona.com, not the upstream manual. For any version-specific question (current component config keys, a startup failure with encrypted redo logs, migration steps) **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
 
 ```
 search_percona_docs(query="<your question verbatim>",
