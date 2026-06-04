@@ -1,6 +1,6 @@
 ---
 name: xtrabackup-recipes
-description: "Practical recipes for Percona XtraBackup (PXB) - the hot, physical, non-blocking backup tool for Percona Server, upstream MySQL, and Percona XtraDB Cluster. Use this skill when the user asks how to back up a MySQL-family database with XtraBackup, how to take or restore full / incremental / streaming / compressed / encrypted backups, how to upload to S3 or other object storage via xbcloud, how to chain incrementals correctly, how to prepare a backup before restore, what to do when restore fails, how XtraBackup differs from mysqldump or MySQL Enterprise Backup, or which XtraBackup version goes with which server version. CRITICAL POINT - XtraBackup is strictly version-paired with the server: PXB 8.0 against MySQL/PS 8.0, PXB 8.4 against MySQL/PS 8.4. Mixing major versions is unsupported and silently produces corrupt backups; agents must verify the pair before issuing commands."
+description: "Practical recipes for Percona XtraBackup (PXB) - the hot, physical, non-blocking backup tool for Percona Server, upstream MySQL, and Percona XtraDB Cluster. Use this skill when the user asks how to back up a MySQL-family database with XtraBackup, how to take or restore full / incremental / streaming / compressed / encrypted backups, how to upload to S3 or other object storage via xbcloud, how to chain incrementals correctly, how to prepare a backup before restore, what to do when restore fails, how to rebuild a replica or do point-in-time recovery from a backup, which grants the backup user needs, how XtraBackup differs from mysqldump or MySQL Enterprise Backup, or which XtraBackup version goes with which server version. CRITICAL POINT - XtraBackup is strictly version-paired with the server: PXB 8.0 against MySQL/PS 8.0, PXB 8.4 against MySQL/PS 8.4. Mixing major versions is unsupported and silently produces corrupt backups; agents must verify the pair before issuing commands."
 ---
 
 # Percona XtraBackup Recipes
@@ -27,10 +27,22 @@ A complete backup-and-restore is always **three steps**: `--backup`, `--prepare`
 | Skipping `--prepare` and going straight to `--copy-back` | The backup directory contains pages from a "crashed" server until you run `xtrabackup --prepare --target-dir=…`. Without prepare, the restored datadir will not start. |
 | Preparing intermediate incrementals without `--apply-log-only` | For an incremental chain, **all incrementals except the last** must be prepared with `--apply-log-only`. The final prepare on the chain runs without that flag. Getting this wrong silently corrupts the backup. |
 | Suggesting **MySQL Enterprise Backup** (`mysqlbackup`) syntax against a Percona Server | MEB is a separate Oracle commercial product. Its CLI flags, lock semantics, and metadata files do not transfer to XtraBackup. |
-| Granting `RELOAD, LOCK TABLES, REPLICATION CLIENT` and calling it done | On MySQL 8.0+, XtraBackup also needs `BACKUP_ADMIN` (for `LOCK INSTANCE FOR BACKUP`) and on 8.4 also `INNODB_REDO_LOG_ARCHIVE` for redo log archiving. See the docs for the full grant list. |
+| Granting `SUPER` to the backup user, or only `RELOAD, LOCK TABLES, REPLICATION CLIENT` | `SUPER` is the wrong, over-broad grant. The actual set is `BACKUP_ADMIN, PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT` on `*.*` plus `SELECT` on `performance_schema.log_status` (and `keyring_component_status` / `replication_group_members` where those features apply). `BACKUP_ADMIN` is what authorizes `LOCK INSTANCE FOR BACKUP`; on 8.4 add `INNODB_REDO_LOG_ARCHIVE` for redo log archiving. |
 | Backing up a PXC node with no Galera flags | Add `--galera-info` so the backup records the cluster's WSREP GTID position; required to use the backup as an SST donor or to rebuild a node. |
+| Reading `xtrabackup_slave_info` for PITR on the backup's own host | `xtrabackup_slave_info` holds the *source's* coordinates (for seeding a replica). For PITR on the backed-up server use `xtrabackup_binlog_info`. |
+| `CHANGE MASTER TO` / `START SLAVE` when rebuilding an 8.4 replica | 8.4 removed both. Use `CHANGE REPLICATION SOURCE TO` / `START REPLICA` - which is exactly what `--slave-info` already writes into `xtrabackup_slave_info`. |
 
 ## Recipe: full backup
+
+Backup user grants (the correct set - not `SUPER`):
+
+```sql
+CREATE USER 'backup'@'localhost' IDENTIFIED BY '…';
+GRANT BACKUP_ADMIN, PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'backup'@'localhost';
+GRANT SELECT ON performance_schema.log_status TO 'backup'@'localhost';
+-- add SELECT on performance_schema.keyring_component_status / replication_group_members where those features apply
+-- on 8.4, also GRANT INNODB_REDO_LOG_ARCHIVE if using redo log archiving
+```
 
 ```bash
 xtrabackup --backup \
@@ -131,14 +143,46 @@ xtrabackup --backup --databases='salesdb other_db' --target-dir=/bk/two
 xtrabackup --backup --tables-exclude='audit\\.events' --target-dir=/bk/no-audit
 ```
 
-Partial backups restore via **transportable tablespaces** (`--export` during prepare, then `IMPORT TABLESPACE` on the target). Plan for that - it is not a `--copy-back`.
+Partial backups restore via **transportable tablespaces** (`--export` during prepare, then `IMPORT TABLESPACE` on the target). Plan for that - it is not a `--copy-back`. A partial backup cannot be used as an incremental base.
+
+## Recipe: point-in-time recovery
+
+Restore a full backup, start the server, then replay binary logs from the position the backup recorded in **`xtrabackup_binlog_info`** (not `xtrabackup_slave_info` - see below).
+
+```bash
+xtrabackup --copy-back --target-dir=/bk/base && chown -R mysql:mysql /var/lib/mysql
+systemctl start mysql
+cat /bk/base/xtrabackup_binlog_info          # e.g. mysql-bin.000003   57
+mysqlbinlog /var/lib/mysql/mysql-bin.000003 /var/lib/mysql/mysql-bin.000004 \
+  --start-position=57 --stop-datetime="2026-05-27 14:00:00" | mysql -u root -p
+```
+
+## Recipe: rebuild a replica from a backup
+
+Back up the source (or an existing replica with `--slave-info --safe-slave-backup`), prepare, copy to the new node, then point replication at the recorded coordinates.
+
+```bash
+# GTID-based (preferred): line 3 of xtrabackup_binlog_info holds the GTID set
+mysql -e "RESET BINARY LOGS AND GTIDS;
+          SET GLOBAL gtid_purged='<gtid-set-from-xtrabackup_binlog_info>';
+          CHANGE REPLICATION SOURCE TO SOURCE_HOST='src', SOURCE_USER='repl',
+            SOURCE_PASSWORD='***', SOURCE_AUTO_POSITION=1;
+          START REPLICA;"
+```
+
+Two coordinate files, two purposes:
+
+- **`xtrabackup_binlog_info`** - the *backed-up server's own* binlog position/GTID. Use this for PITR and when seeding from the source.
+- **`xtrabackup_slave_info`** - the *source's* coordinates as seen by a replica (written when you pass `--slave-info`). Use this when seeding a new replica from an existing replica. `--slave-info` writes a ready-made `CHANGE REPLICATION SOURCE TO …` statement into it.
+
+**8.4 note:** MySQL/PS 8.4 removed `CHANGE MASTER TO` and `START SLAVE`. Use `CHANGE REPLICATION SOURCE TO` / `START REPLICA` - which is exactly the statement form `--slave-info` already writes.
 
 ## PS 8.0 vs PS 8.4 differences
 
 | Topic | 8.0 | 8.4 |
 |---|---|---|
 | Redo log sizing | Both legacy variables (`innodb_log_files_in_group`, `innodb_log_file_size`) and the modern `innodb_redo_log_capacity` (8.0.30+) are recognized | Legacy variables **removed**; `innodb_redo_log_capacity` is the only knob. XtraBackup honors the active variable automatically. |
-| Required grants | `BACKUP_ADMIN` added | Also `INNODB_REDO_LOG_ARCHIVE` for redo log archiving feature |
+| Required grants | `BACKUP_ADMIN` added to the base set (`PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT` + `SELECT` on `performance_schema.log_status`) | Same base set; also `INNODB_REDO_LOG_ARCHIVE` for the redo log archiving feature |
 | `mysql_native_password` plugin | Default-loaded | Not loaded by default - use `caching_sha2_password` for the backup user, or explicitly load the plugin |
 | Compression default | ZSTD (since 8.0.34-29); LZ4 and ZSTD selectable. QuickLZ removed for backup. | ZSTD; same options as 8.0.34-29+. |
 | Component-based keyring (`component_keyring_file`, `component_keyring_kmip`) | Supported | Supported; plugin-based keyring is deprecated - migrate before going to 8.4 |
@@ -177,5 +221,8 @@ search_percona_docs(query="<your question verbatim>",
 - [Percona XtraBackup 8.4 Documentation](https://docs.percona.com/percona-xtrabackup/8.4/)
 - [Percona XtraBackup 8.0 Documentation](https://docs.percona.com/percona-xtrabackup/8.0/)
 - [Privileges required for XtraBackup](https://docs.percona.com/percona-xtrabackup/8.4/using_xtrabackup/privileges.html)
+- [Server/backup version comparison](https://docs.percona.com/percona-xtrabackup/8.4/server-backup-version-comparison.html)
+- [Point-in-time recovery](https://docs.percona.com/percona-xtrabackup/8.4/point-in-time-recovery.html)
+- [Restore individual tables](https://docs.percona.com/percona-xtrabackup/8.4/restore-individual-tables.html)
 - [xbcloud documentation](https://docs.percona.com/percona-xtrabackup/8.4/xbcloud/xbcloud.html)
 - [Percona Jira - PXB project](https://jira.percona.com/projects/PXB)
