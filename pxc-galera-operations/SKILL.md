@@ -43,52 +43,16 @@ Open ports: **3306** (SQL), **4567** (group comm), **4444** (SST), **4568** (IST
 | Different SSL certs per node | All nodes (and `garbd`) must share **identical** CA/cert/key files or they won't join. |
 | Using XtraBackup-level SST encryption (`[xtrabackup] encrypt=`) on PXC 8.4 | **Removed in 8.4** - PXC errors if it detects it. Use `pxc-encrypt-cluster-traffic` (on by default) for SST/IST/replication TLS. |
 
-## Bootstrapping & joining
+## Bootstrapping essentials
 
-Config on every node (`mysqld.cnf`):
-```ini
-wsrep_provider=/usr/lib/galera4/libgalera_smm.so
-wsrep_cluster_name=pxc-prod
-wsrep_cluster_address=gcomm://10.0.0.1,10.0.0.2,10.0.0.3   # peer list; empty = bootstrap a NEW cluster
-wsrep_node_address=10.0.0.1          # unique per node
-wsrep_node_name=pxc1                 # unique per node
-wsrep_sst_method=xtrabackup-v2
-pxc_strict_mode=ENFORCING
-innodb_autoinc_lock_mode=2
-default_storage_engine=InnoDB
-wsrep_applier_threads=8
-```
-```bash
-# Node 1 - bootstrap a NEW cluster (stop with the same unit)
-systemctl start mysql@bootstrap.service
-#   verify: SHOW STATUS LIKE 'wsrep_cluster_size';  -> 1, wsrep_cluster_status=Primary
+- Bootstrap only when the **whole** cluster is down. Bootstrapping into a running cluster forks it into two divergent clusters. A node rejoining a live cluster is started **normally** (`systemctl start mysql`), not bootstrapped, and pulls state via IST or SST automatically.
+- Bootstrap exactly one node via `systemctl start mysql@bootstrap.service` - never by leaving `wsrep_cluster_address=gcomm://` in config (that makes every restart bootstrap a new cluster).
+- **After a graceful full shutdown** the node with the highest `seqno` in `grastate.dat` is the most advanced - bootstrap that one.
+- **After an unclean full outage** every `grastate.dat` shows `seqno: -1` / `safe_to_bootstrap: 0`. Do **not** trust `safe_to_bootstrap`. Run `mysqld --wsrep-recover` on each node, read the recovered `UUID:seqno` from the log, pick the highest, set `safe_to_bootstrap: 1` there, then bootstrap from it; start the rest normally.
 
-# Nodes 2 and 3 - normal start; SST/IST happens automatically.
-# Wait for wsrep_local_state_comment=Synced before adding the next node.
-systemctl start mysql
-```
+Full config and the bootstrap/join command sequence are in `references/operations.md`.
 
-A bootstrap node has effectively `wsrep_cluster_address=gcomm://` (empty = create a new cluster). Other nodes list peers: `gcomm://10.0.0.1,10.0.0.2,10.0.0.3`.
-
-### Bootstrapping after a full shutdown
-
-```bash
-# Graceful full shutdown: highest seqno in grastate.dat is the most-advanced node.
-grep seqno /var/lib/mysql/grastate.dat        # on each node
-
-# Unclean outage (seqno: -1 everywhere): recover the position first.
-mysqld --wsrep-recover                        # read "Recovered position UUID:seqno" from log
-# Pick the node with the greatest seqno, then:
-#   set safe_to_bootstrap: 1 in its grastate.dat
-systemctl start mysql@bootstrap.service       # bootstrap ONLY that node
-# Then start the remaining nodes normally - they join via IST or SST.
-```
-
-## Clone SST (PXC 8.4)
-
-PXC 8.4 (8.4.4-x) adds MySQL Clone-plugin-based SST. Set `wsrep_sst_method=clone` on the joiner; `clone` must be in `wsrep_sst_allowed_methods` on both donor and joiner (8.4 default is `xtrabackup-v2, clone`). Requires the `CLONE_ADMIN` privilege and the NetCat package; default port 4444. (Clone is also available on the 8.0 line from 8.0.41+.) Both variables are read-only / config-file-only.
-
-## Schema changes
+## Schema changes (TOI vs RSU vs NBO)
 
 - **TOI** (`wsrep_OSU_method=TOI`, default) - DDL replicated in total order; blocks the **whole cluster** for its duration. Fine for fast/instant DDL, dangerous for big rebuilds.
 - **RSU** (`SET wsrep_OSU_method='RSU'`) - node desyncs, applies DDL locally, then rejoins; the cluster stays up but schemas differ transiently (the app must tolerate it). Needs gcache headroom.
@@ -106,68 +70,15 @@ PXC 8.4 (8.4.4-x) adds MySQL Clone-plugin-based SST. Set `wsrep_sst_method=clone
 
 Values: `DISABLED`, `PERMISSIVE`, `ENFORCING` (default), `MASTER`. Default is `ENFORCING`, except a standalone/bootstrapping node defaults to `DISABLED`. ENFORCING blocks unsupported operations outright (no-PK DML, non-InnoDB writes, `innodb_autoinc_lock_mode != 2`, `LOCK TABLES`/`GET_LOCK()`, wrong `binlog_format`, Group Replication); PERMISSIVE logs and continues. Note: validation happens on the **originating** node - an op let through on a DISABLED node is not re-checked on ENFORCING peers.
 
-## Key variables
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `wsrep_cluster_address` | - | `gcomm://` peer list; empty = bootstrap |
-| `wsrep_sst_method` | `xtrabackup-v2` | SST method (`clone` in 8.4.4+ / 8.0.41+) |
-| `pxc_strict_mode` | `ENFORCING` | PK/engine/locking validation (`DISABLED`/`PERMISSIVE`/`ENFORCING`/`MASTER`) |
-| `wsrep_OSU_method` | `TOI` | DDL replication mode (`TOI`/`RSU`/`NBO`) |
-| `wsrep_provider_options` | - | e.g. `gcache.size=1G;pc.weight=2` |
-| `innodb_autoinc_lock_mode` | must be `2` | Required by Galera |
-| `wsrep_applier_threads` | `1` | Parallel apply (tune to `wsrep_cert_deps_distance`); replaces deprecated `wsrep_slave_threads` |
-| `wsrep_sync_wait` | `0` | Causal-read consistency level |
-
-## Monitoring cluster health
-
-```sql
-SHOW GLOBAL STATUS LIKE 'wsrep%';
-```
-| Variable | Healthy | Alarm |
-|---|---|---|
-| `wsrep_cluster_status` | `Primary` | anything else = not in the primary component |
-| `wsrep_local_state_comment` | `Synced` | `Joining`/`Donor/Desynced` = not ready |
-| `wsrep_ready` | `ON` | `OFF` -> error 1047 on all DML |
-| `wsrep_flow_control_paused` | ~`0` | `>0.1` = a node is throttling the whole cluster |
-| `wsrep_local_recv_queue_avg` | `0` | sustained `>0` = this node can't keep up |
-| `wsrep_local_cert_failures` / `wsrep_local_bf_aborts` | flat | rising = hot-row certification conflicts |
-
-## Load balancing
-
-Health-check on cluster state, not raw TCP, so traffic never reaches a `JOINING`/`DONOR` node.
-- **HAProxy** - use `option httpchk` against the `clustercheck` script (port 9200), not `option mysql-check`.
-- **ProxySQL** - add nodes to a hostgroup with a monitor user; drain a node for maintenance with `SET GLOBAL pxc_maint_mode=MAINTENANCE;` (ProxySQL stops routing after ~10s), then `DISABLED` when done.
-
-## garbd (Galera Arbitrator)
-
-A voting-only daemon (no data) that gives an even node count a quorum tiebreaker - cheaper than a third full node.
-```ini
-# /etc/default/garb
-GALERA_NODES="10.0.0.1:4567,10.0.0.2:4567"
-GALERA_GROUP="pxc-prod"
-# SSL is ON by default in PXC 8.x - garbd MUST set a cipher or it crashes (gnu::NotSet):
-GALERA_OPTIONS="socket.ssl_cipher=AES128-SHA256;socket.ssl_key=...;socket.ssl_cert=...;socket.ssl_ca=..."
-```
-
-## Encryption & large transactions
-
-- **Traffic encryption** is ON by default (`pxc-encrypt-cluster-traffic=ON`, covers SST/IST/replication). All nodes must use **identical** cert files; changing it needs a full cluster stop. PXC 8.4 **removed** XtraBackup-level SST encryption (`[xtrabackup] encrypt=`) - rely on `pxc-encrypt-cluster-traffic`.
-- **Huge transactions** - by default the whole write-set is buffered in memory (`wsrep_max_ws_size` 2 GB). Fragment a big batch with streaming replication instead:
-  ```sql
-  SET SESSION wsrep_trx_fragment_unit='rows';
-  SET SESSION wsrep_trx_fragment_size=10000;
-  ```
-
-## Upgrades
-
-Rolling **8.0 -> 8.4**, one node at a time: remove 8.0 packages (keep datadir), install 8.4, start (auto-upgrade + SST/IST rejoin). Keep writes on 8.0 nodes during the mixed window and avoid 8.4-only DDL until done. PXC 8.4 switches the keyring plugin to a component and defaults to `caching_sha2_password` (needs ProxySQL >= 2.6.2).
-
 ## PXC vs async vs Group Replication
 
 - **PXC** - strong consistency, no data loss on failover, automatic node provisioning; best within one low-latency datacenter; needs apps that retry on 1213. Min 3 nodes.
 - **Async replication** - best for write-heavy single-primary, high-latency/cross-region, or bulk loads; replicas may lag and failover can lose data. See `mysql-replication-ha`.
 - **Group Replication** - MySQL-native alternative; PXC's strict mode **blocks running it alongside PXC**.
+
+## Deep reference
+
+- [`references/operations.md`](references/operations.md) - read when you need exact operational detail: the full per-node config and bootstrap/join command sequence, Clone-SST setup (8.4), the Key Variables and monitoring status-var tables, load-balancer health-check config (HAProxy `clustercheck`/`httpchk`, ProxySQL `pxc_maint_mode`), garbd SSL detail, large-transaction fragmenting, and the rolling 8.0 -> 8.4 upgrade procedure.
 
 ## Call `percona-dk` for fresh facts
 
