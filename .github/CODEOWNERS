@@ -1,13 +1,30 @@
 # Code owners for Percona-Lab/skills
 #
-# Catch-all owner during v0.1. Per-skill engineering-lead reviewers will be
-# added once tester/reviewer roles are settled - see the commented block
-# below for the intended routing.
+# GitHub applies the LAST matching pattern, so the catch-all comes first and
+# the per-skill lines below override it for those paths.
+#
+# Handles for the engineering-lead co-reviewers are still being settled
+# (the <...-lead> placeholders); confirm and replace them as roles land.
 
 *                                       @dennis-kittrell
 
-# --- Planned per-skill ownership (uncomment + confirm handles when roles land) ---
-#
-# /mysql-to-percona/                     @dennis-kittrell @<ps-mysql-lead>
-# /xtrabackup-recipes/                   @dennis-kittrell @<pxb-lead>
-# /percona-toolkit-recipes/              @dennis-kittrell @<toolkit-lead>
+# --- MySQL ecosystem skills imported from EvgeniyPatlan/percona-mysql-skills ---
+# Owned by their original author.
+
+/oracle-to-percona/                     @EvgeniyPatlan
+/mysql-query-optimization/              @EvgeniyPatlan
+/mysql-replication-ha/                  @EvgeniyPatlan
+/mysql-js-stored-procedures/            @EvgeniyPatlan
+/percona-server-features/               @EvgeniyPatlan
+/mysql-encryption/                      @EvgeniyPatlan
+/mysql-audit-logging/                   @EvgeniyPatlan
+/mysql-data-masking/                    @EvgeniyPatlan
+
+# --- Overlapping skills reconciled during the merge (co-owned) ---
+
+/mysql-to-percona/                      @dennis-kittrell @EvgeniyPatlan
+/xtrabackup-recipes/                    @dennis-kittrell @EvgeniyPatlan
+/percona-toolkit-recipes/               @dennis-kittrell @EvgeniyPatlan
+/pxc-galera-operations/                 @dennis-kittrell @EvgeniyPatlan
+/pmm-operations/                        @dennis-kittrell @EvgeniyPatlan
+/percona-operators-on-k8s/              @dennis-kittrell @EvgeniyPatlan
