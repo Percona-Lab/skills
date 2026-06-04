@@ -24,6 +24,16 @@ Short markdown briefings that AI coding agents (Claude Code, Cursor, Copilot, Co
 | [`postgres-to-percona-pg`](postgres-to-percona-pg/SKILL.md) | Migration from community PostgreSQL to Percona Distribution for PostgreSQL: the package-swap path, pg_tde TDE, pg_stat_monitor, and the Patroni/etcd/HAProxy HA stack. |
 | [`mongodb-to-psmdb`](mongodb-to-psmdb/SKILL.md) | Migration from MongoDB Community or Atlas to Percona Server for MongoDB: in-place swap, the PCSM live-migration tool, FCV, and config gotchas. |
 
+## Who it's for
+
+Anyone who points an AI coding agent at Percona software:
+
+- **Operators and developers** writing install scripts, Ansible/Terraform, Kubernetes manifests, or runbooks - where a wrong flag, package name, or Custom Resource field ends up in real infrastructure.
+- **Teams running agents without web access** (CI jobs, agentic pipelines) that can't fall back to a search engine.
+- **Anyone migrating to or operating** Percona Server for MySQL, PXC, Percona Server for MongoDB, Percona Distribution for PostgreSQL, XtraBackup, PBM, PMM, the Kubernetes Operators, or Percona Toolkit.
+
+The skills help most when the agent is about to *act* on a Percona-specific or version-specific detail: choosing the right tool (XtraBackup over `mysqldump`, `pt-online-schema-change` over a blocking `ALTER`), getting an operator CR field right, or avoiding a destructive default. For well-documented conceptual questions a capable model already handles, they add less - the value rises with how autonomous the agent is and how version-sensitive the task. Pairing with Percona DK (below) is what closes the version-specific gap.
+
 ## Better together: Skills + Percona DK
 
 The skills pair with the [Percona Developer Knowledge MCP server](https://github.com/Percona-Lab/percona-dk) (`percona-dk`) - semantic search over Percona's docs, blog, and forums, re-ingested daily. The skills tell the agent **what to recommend and what to avoid**; DK is the **version-correct ground truth** it looks the specifics up in before writing them into code.
