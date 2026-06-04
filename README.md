@@ -100,6 +100,10 @@ Both are worth reading end-to-end if you want to write skills of your own.
 
 The [Agent Skills](https://agentskills.io) convention is community-developed and tool-agnostic - Percona Skills are interoperable with any agent that supports it.
 
+## Authors and credits
+
+This pack is maintained under [Percona-Lab](https://github.com/Percona-Lab). The Percona Server for MySQL ecosystem skills - `mysql-to-percona`, `percona-server-features`, `mysql-query-optimization`, `mysql-replication-ha`, `mysql-encryption`, `mysql-audit-logging`, `mysql-data-masking`, `mysql-js-stored-procedures`, and `oracle-to-percona` - originated in [**EvgeniyPatlan/percona-mysql-skills**](https://github.com/EvgeniyPatlan/percona-mysql-skills) by **Evgeniy Patlan**, and were merged here as part of consolidating the two packs into one home. Evgeniy co-maintains those skills (see [CODEOWNERS](.github/CODEOWNERS)); his sharper MySQL detail also strengthened the overlapping backup, toolkit, PXC, PMM, and operator skills.
+
 ## Contributing
 
 Issues and pull requests welcome. For new skills, sweeping rewrites, or anything that changes the launch set, please open an issue first to align on scope. Everything else - broken links, version corrections, additional wrong/right rows, clarifications - can go straight to a PR. See [CONTRIBUTING.md](CONTRIBUTING.md).
