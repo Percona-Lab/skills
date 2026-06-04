@@ -12,7 +12,9 @@ git clone git@github.com:Percona-Lab/skills.git ~/code/percona-skills
 
 # Symlink each skill into Claude Code's skill folder
 mkdir -p ~/.claude/skills
-for skill in percona-dk-mcp mysql-to-percona xtrabackup-recipes percona-toolkit-recipes \
+for skill in percona-dk-mcp mysql-to-percona percona-server-features mysql-query-optimization \
+             mysql-replication-ha mysql-encryption mysql-audit-logging mysql-data-masking \
+             mysql-js-stored-procedures oracle-to-percona xtrabackup-recipes percona-toolkit-recipes \
              pmm-operations psmdb-features pbm-recipes pxc-galera-operations \
              percona-operators-on-k8s postgres-to-percona-pg mongodb-to-psmdb; do
   ln -s ~/code/percona-skills/$skill ~/.claude/skills/$skill
