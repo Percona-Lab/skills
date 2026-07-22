@@ -57,7 +57,7 @@ The skills pair with the [Percona Developer Knowledge MCP server](https://github
 The initial roadmap is complete. Candidate next skills:
 
 - **`mysql-server-tuning`** - how to approach Percona server/knob tuning *safely and correctly*: which variables actually move the needle (buffer pool, redo log capacity, flushing, thread pool), version-specific defaults, the dangerous knobs, and measuring before/after with PMM and Query Analytics instead of pasting a `my.cnf` from an old blog post. Scoped to *guiding* the agent, not autonomous optimization - automatic knob-tuning remains an open research problem, and a skill should say so rather than pretend to solve it. (Distinct from `mysql-query-optimization`, which covers queries and indexes.)
-- A Valkey distribution skill, deeper Operator recipes, replication topologies.
+- Deeper Operator recipes, replication topologies.
 
 Open an issue to propose one, or a PR to add it.
 
