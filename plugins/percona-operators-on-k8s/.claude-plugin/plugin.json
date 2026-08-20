@@ -1,0 +1,8 @@
+{
+  "name": "percona-operators-on-k8s",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Percona Operators for PXC, MongoDB, PostgreSQL, and MySQL: CR patterns, backups, scaling, upgrades, and the per-operator field differences agents hallucinate.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

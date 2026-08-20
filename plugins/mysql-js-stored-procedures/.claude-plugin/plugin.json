@@ -1,0 +1,8 @@
+{
+  "name": "mysql-js-stored-procedures",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Writing stored procedures and functions in JavaScript on Percona Server for MySQL via the js_lang component (tech preview).",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "pmm-operations",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Percona Monitoring and Management: install, client agents, Query Analytics, custom queries, and alerting - including PMM 2 vs 3.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

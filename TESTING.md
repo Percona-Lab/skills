@@ -4,7 +4,9 @@ This is the v0.1 dogfood guide. Anyone with repo access is welcome to try it: ge
 
 ## 1. Install (with repo access)
 
-The repo is public, so the installers work: `npx skills add Percona-Lab/skills` (interactive) or the raw-content `curl` per the README. For local iteration on the skills themselves, git clone + symlinks is handy:
+The repo is public. The fastest path is the Claude Code marketplace - `/plugin marketplace add Percona-Lab/skills`, then `/plugin install <skill-name>@percona-skills` (or just `/plugin` to browse). See the README for other agents.
+
+Note the layout changed: skills now live at `plugins/<skill-name>/skills/<skill-name>/`, not at the repo root, and `npx skills add Percona-Lab/skills` no longer works. For local iteration on the skills themselves, git clone + symlinks is still handy:
 
 ```bash
 # Clone once
@@ -17,7 +19,7 @@ for skill in percona-dk-mcp mysql-to-percona percona-server-features mysql-query
              mysql-js-stored-procedures oracle-to-percona xtrabackup-recipes percona-toolkit-recipes \
              pmm-operations psmdb-features pbm-recipes pxc-galera-operations \
              percona-operators-on-k8s postgres-to-percona-pg mongodb-to-psmdb; do
-  ln -s ~/code/percona-skills/$skill ~/.claude/skills/$skill
+  ln -s ~/code/percona-skills/plugins/$skill/skills/$skill ~/.claude/skills/$skill
 done
 ```
 
@@ -35,7 +37,7 @@ The skills lean on the percona-dk MCP for fresh, version-specific facts. Today i
 curl -fsSL https://raw.githubusercontent.com/Percona-Lab/percona-dk/main/install-percona-dk | bash
 ```
 
-For other agents, see [`percona-dk-mcp/SKILL.md`](percona-dk-mcp/SKILL.md) for per-tool configuration. Without DK, the skills still work; the agent will note when an answer would benefit from fresher docs.
+For other agents, see [`percona-dk-mcp/SKILL.md`](plugins/percona-dk-mcp/skills/percona-dk-mcp/SKILL.md) for per-tool configuration. Without DK, the skills still work; the agent will note when an answer would benefit from fresher docs.
 
 ## 3. Try these prompts
 

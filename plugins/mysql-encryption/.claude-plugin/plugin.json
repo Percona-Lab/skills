@@ -1,0 +1,8 @@
+{
+  "name": "mysql-encryption",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Data-at-rest encryption and keyring management for Percona Server for MySQL: the master-key hierarchy, the file/Vault/KMIP/AWS-KMS keyrings, and key rotation.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

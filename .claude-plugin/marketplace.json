@@ -1,0 +1,124 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "percona-skills",
+  "description": "Percona Skills for Claude Code - short briefings that keep AI agents accurate on Percona Server for MySQL, PXC, PSMDB, PostgreSQL, XtraBackup, PBM, PMM, Toolkit, and the Kubernetes Operators",
+  "owner": {
+    "name": "Percona Lab"
+  },
+  "plugins": [
+    {
+      "name": "percona-dk-mcp",
+      "description": "When to query the Percona Developer Knowledge MCP, how to shape queries, and how to scope by product and version.",
+      "source": "./plugins/percona-dk-mcp",
+      "category": "developer-tools"
+    },
+    {
+      "name": "mysql-to-percona",
+      "description": "Drop-in migration from upstream MySQL or MariaDB to Percona Server for MySQL, including the MySQL 8.4 breaking changes.",
+      "source": "./plugins/mysql-to-percona",
+      "category": "developer-tools"
+    },
+    {
+      "name": "percona-server-features",
+      "description": "What Percona Server for MySQL adds over stock MySQL: User Statistics, the extended slow log, threadpool, backup locks, and MyRocks.",
+      "source": "./plugins/percona-server-features",
+      "category": "developer-tools"
+    },
+    {
+      "name": "mysql-query-optimization",
+      "description": "Diagnosing slow queries and designing indexes with Percona Server's extra instrumentation: userstat, the extended slow log, and pt-query-digest.",
+      "source": "./plugins/mysql-query-optimization",
+      "category": "developer-tools"
+    },
+    {
+      "name": "mysql-replication-ha",
+      "description": "The non-Galera MySQL HA options - async/GTID, semi-synchronous, and Group Replication - plus the 8.4 SOURCE/REPLICA syntax.",
+      "source": "./plugins/mysql-replication-ha",
+      "category": "developer-tools"
+    },
+    {
+      "name": "mysql-encryption",
+      "description": "Data-at-rest encryption and keyring management for Percona Server for MySQL: the master-key hierarchy, the file/Vault/KMIP/AWS-KMS keyrings, and key rotation.",
+      "source": "./plugins/mysql-encryption",
+      "category": "developer-tools"
+    },
+    {
+      "name": "mysql-audit-logging",
+      "description": "The open-source Audit Log Filter for Percona Server for MySQL: installing the component, the JSON filter rule DSL, and log rotation and encryption.",
+      "source": "./plugins/mysql-audit-logging",
+      "category": "developer-tools"
+    },
+    {
+      "name": "mysql-data-masking",
+      "description": "Masking PII and generating synthetic test data with the open-source data masking component for Percona Server for MySQL.",
+      "source": "./plugins/mysql-data-masking",
+      "category": "developer-tools"
+    },
+    {
+      "name": "mysql-js-stored-procedures",
+      "description": "Writing stored procedures and functions in JavaScript on Percona Server for MySQL via the js_lang component (tech preview).",
+      "source": "./plugins/mysql-js-stored-procedures",
+      "category": "developer-tools"
+    },
+    {
+      "name": "oracle-to-percona",
+      "description": "Migrating from Oracle Database to Percona Server for MySQL: data-type mapping and rewriting PL/SQL, sequences, ROWNUM, and CONNECT BY.",
+      "source": "./plugins/oracle-to-percona",
+      "category": "developer-tools"
+    },
+    {
+      "name": "xtrabackup-recipes",
+      "description": "Hot physical backups with Percona XtraBackup - full, incremental, streamed, compressed, encrypted, and restored.",
+      "source": "./plugins/xtrabackup-recipes",
+      "category": "developer-tools"
+    },
+    {
+      "name": "percona-toolkit-recipes",
+      "description": "When to reach for pt-online-schema-change, pt-archiver, pt-query-digest, or pt-table-checksum instead of the obvious-but-wrong alternative.",
+      "source": "./plugins/percona-toolkit-recipes",
+      "category": "developer-tools"
+    },
+    {
+      "name": "pmm-operations",
+      "description": "Percona Monitoring and Management: install, client agents, Query Analytics, custom queries, and alerting - including PMM 2 vs 3.",
+      "source": "./plugins/pmm-operations",
+      "category": "developer-tools"
+    },
+    {
+      "name": "psmdb-features",
+      "description": "Percona Server for MongoDB: hot backup, encryption, audit, LDAP/Kerberos/OIDC, and the in-memory engine, with version gates.",
+      "source": "./plugins/psmdb-features",
+      "category": "developer-tools"
+    },
+    {
+      "name": "pbm-recipes",
+      "description": "Percona Backup for MongoDB: logical, physical, and incremental backups, PITR, selective restore, and sharded clusters.",
+      "source": "./plugins/pbm-recipes",
+      "category": "developer-tools"
+    },
+    {
+      "name": "pxc-galera-operations",
+      "description": "Percona XtraDB Cluster: SST/IST, bootstrap after outage, flow control, split-brain and quorum, pxc_strict_mode, and Clone SST.",
+      "source": "./plugins/pxc-galera-operations",
+      "category": "developer-tools"
+    },
+    {
+      "name": "percona-operators-on-k8s",
+      "description": "Percona Operators for PXC, MongoDB, PostgreSQL, and MySQL: CR patterns, backups, scaling, upgrades, and the per-operator field differences agents hallucinate.",
+      "source": "./plugins/percona-operators-on-k8s",
+      "category": "developer-tools"
+    },
+    {
+      "name": "postgres-to-percona-pg",
+      "description": "Migration to Percona Distribution for PostgreSQL: the package-swap path, pg_tde TDE, pg_stat_monitor, and the Patroni/etcd/HAProxy HA stack.",
+      "source": "./plugins/postgres-to-percona-pg",
+      "category": "developer-tools"
+    },
+    {
+      "name": "mongodb-to-psmdb",
+      "description": "Migration from MongoDB Community or Atlas to Percona Server for MongoDB: the in-place swap, the PCSM live-migration tool, and FCV.",
+      "source": "./plugins/mongodb-to-psmdb",
+      "category": "developer-tools"
+    }
+  ]
+}

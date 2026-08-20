@@ -1,0 +1,8 @@
+{
+  "name": "mysql-replication-ha",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "The non-Galera MySQL HA options - async/GTID, semi-synchronous, and Group Replication - plus the 8.4 SOURCE/REPLICA syntax.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "percona-dk-mcp",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "When to query the Percona Developer Knowledge MCP, how to shape queries, and how to scope by product and version.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

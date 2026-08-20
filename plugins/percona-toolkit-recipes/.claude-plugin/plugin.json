@@ -1,0 +1,8 @@
+{
+  "name": "percona-toolkit-recipes",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "When to reach for pt-online-schema-change, pt-archiver, pt-query-digest, or pt-table-checksum instead of the obvious-but-wrong alternative.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}
