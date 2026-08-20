@@ -1,0 +1,8 @@
+{
+  "name": "mongodb-to-psmdb",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Migration from MongoDB Community or Atlas to Percona Server for MongoDB: the in-place swap, the PCSM live-migration tool, and FCV.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

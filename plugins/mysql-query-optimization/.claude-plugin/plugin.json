@@ -1,0 +1,8 @@
+{
+  "name": "mysql-query-optimization",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Diagnosing slow queries and designing indexes with Percona Server's extra instrumentation: userstat, the extended slow log, and pt-query-digest.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

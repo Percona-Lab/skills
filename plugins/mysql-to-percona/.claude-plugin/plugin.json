@@ -1,0 +1,8 @@
+{
+  "name": "mysql-to-percona",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Drop-in migration from upstream MySQL or MariaDB to Percona Server for MySQL, including the MySQL 8.4 breaking changes.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "postgres-to-percona-pg",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Migration to Percona Distribution for PostgreSQL: the package-swap path, pg_tde TDE, pg_stat_monitor, and the Patroni/etcd/HAProxy HA stack.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

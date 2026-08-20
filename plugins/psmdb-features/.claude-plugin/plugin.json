@@ -1,0 +1,8 @@
+{
+  "name": "psmdb-features",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Percona Server for MongoDB: hot backup, encryption, audit, LDAP/Kerberos/OIDC, and the in-memory engine, with version gates.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

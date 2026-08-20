@@ -1,0 +1,8 @@
+{
+  "name": "mysql-audit-logging",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "The open-source Audit Log Filter for Percona Server for MySQL: installing the component, the JSON filter rule DSL, and log rotation and encryption.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

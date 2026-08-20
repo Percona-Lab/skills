@@ -12,25 +12,25 @@ Short markdown briefings that AI coding agents (Claude Code, Cursor, Copilot, Co
 
 | Skill | What it covers |
 |---|---|
-| [`percona-dk-mcp`](percona-dk-mcp/SKILL.md) | When to query the Percona Developer Knowledge MCP, how to shape queries, how to scope by product and version. |
-| [`mysql-to-percona`](mysql-to-percona/SKILL.md) | Drop-in migration from upstream MySQL to Percona Server for MySQL. The Percona-only plugins (audit, thread pool, PAM/LDAP, data masking) and the variables agents miss. |
-| [`percona-server-features`](percona-server-features/SKILL.md) | What Percona Server adds over stock MySQL: User Statistics, the extended slow log, threadpool, backup locks, MyRocks, kill-idle-transaction, UUIDv7 - the things agents rarely suggest unprompted. The map to the feature-specific skills below. |
-| [`mysql-query-optimization`](mysql-query-optimization/SKILL.md) | Diagnosing slow queries and designing indexes with Percona Server's extra instrumentation: `userstat`, the extended slow log, `pt-query-digest`, plus EXPLAIN ANALYZE, histograms, and invisible indexes. |
-| [`mysql-replication-ha`](mysql-replication-ha/SKILL.md) | The non-Galera HA options: async/GTID, semi-synchronous, and Group Replication - how to choose, set up, and monitor them, plus the 8.4 SOURCE/REPLICA syntax. (Galera lives in `pxc-galera-operations`.) |
-| [`mysql-encryption`](mysql-encryption/SKILL.md) | Data-at-rest encryption and keyring management: the master-key hierarchy, encrypting tablespaces/binlogs/redo-undo/temp files, the file/Vault/KMIP/AWS-KMS keyrings, and master-key rotation. |
-| [`mysql-audit-logging`](mysql-audit-logging/SKILL.md) | The open-source Audit Log Filter: installing the component, the JSON filter rule DSL, assigning filters to users, and log formats/rotation/encryption. |
-| [`mysql-data-masking`](mysql-data-masking/SKILL.md) | Masking PII and generating synthetic test data with the open-source masking component: the `mask_*`/`gen_*` functions, dictionaries, and why it is a presentation layer, not access control. |
-| [`mysql-js-stored-procedures`](mysql-js-stored-procedures/SKILL.md) | Writing stored procedures and functions in JavaScript via the `js_lang` component (tech preview): syntax, privileges, the SQL↔JS type mapping, and the sandbox limits. |
-| [`oracle-to-percona`](oracle-to-percona/SKILL.md) | Migrating from Oracle Database: why it is a true rewrite (no Oracle-compatibility mode, unlike MariaDB), data-type mapping, and rewriting PL/SQL, sequences, `ROWNUM`, and `CONNECT BY`. |
-| [`xtrabackup-recipes`](xtrabackup-recipes/SKILL.md) | Hot physical backups with Percona XtraBackup - full, incremental, streamed, compressed, encrypted, restored. PS 8.0 vs 8.4 differences. |
-| [`percona-toolkit-recipes`](percona-toolkit-recipes/SKILL.md) | When to reach for `pt-online-schema-change`, `pt-archiver`, `pt-query-digest`, `pt-table-checksum` instead of the obvious-but-wrong alternative. |
-| [`pmm-operations`](pmm-operations/SKILL.md) | Percona Monitoring and Management: install, client agents, Query Analytics, custom queries, alerting. PMM 2 vs 3 (and why they don't interoperate). |
-| [`psmdb-features`](psmdb-features/SKILL.md) | Percona Server for MongoDB: hot backup, encryption, audit, LDAP/Kerberos/OIDC, in-memory engine - the MongoDB Enterprise features it ships free, with version gates. |
-| [`pbm-recipes`](pbm-recipes/SKILL.md) | Percona Backup for MongoDB: logical/physical/incremental backups, PITR, selective restore, sharded clusters, the physical-restore footguns. |
-| [`pxc-galera-operations`](pxc-galera-operations/SKILL.md) | Percona XtraDB Cluster: SST/IST, bootstrap after outage, flow control, split-brain/quorum, `pxc_strict_mode`, Clone SST. |
-| [`percona-operators-on-k8s`](percona-operators-on-k8s/SKILL.md) | Operators for PXC/MongoDB/PostgreSQL/MySQL: CR patterns, backups, scaling, upgrades - and the per-operator field differences agents hallucinate. |
-| [`postgres-to-percona-pg`](postgres-to-percona-pg/SKILL.md) | Migration from community PostgreSQL to Percona Distribution for PostgreSQL: the package-swap path, pg_tde TDE, pg_stat_monitor, and the Patroni/etcd/HAProxy HA stack. |
-| [`mongodb-to-psmdb`](mongodb-to-psmdb/SKILL.md) | Migration from MongoDB Community or Atlas to Percona Server for MongoDB: in-place swap, the PCSM live-migration tool, FCV, and config gotchas. |
+| [`percona-dk-mcp`](plugins/percona-dk-mcp/skills/percona-dk-mcp/SKILL.md) | When to query the Percona Developer Knowledge MCP, how to shape queries, how to scope by product and version. |
+| [`mysql-to-percona`](plugins/mysql-to-percona/skills/mysql-to-percona/SKILL.md) | Drop-in migration from upstream MySQL to Percona Server for MySQL. The Percona-only plugins (audit, thread pool, PAM/LDAP, data masking) and the variables agents miss. |
+| [`percona-server-features`](plugins/percona-server-features/skills/percona-server-features/SKILL.md) | What Percona Server adds over stock MySQL: User Statistics, the extended slow log, threadpool, backup locks, MyRocks, kill-idle-transaction, UUIDv7 - the things agents rarely suggest unprompted. The map to the feature-specific skills below. |
+| [`mysql-query-optimization`](plugins/mysql-query-optimization/skills/mysql-query-optimization/SKILL.md) | Diagnosing slow queries and designing indexes with Percona Server's extra instrumentation: `userstat`, the extended slow log, `pt-query-digest`, plus EXPLAIN ANALYZE, histograms, and invisible indexes. |
+| [`mysql-replication-ha`](plugins/mysql-replication-ha/skills/mysql-replication-ha/SKILL.md) | The non-Galera HA options: async/GTID, semi-synchronous, and Group Replication - how to choose, set up, and monitor them, plus the 8.4 SOURCE/REPLICA syntax. (Galera lives in `pxc-galera-operations`.) |
+| [`mysql-encryption`](plugins/mysql-encryption/skills/mysql-encryption/SKILL.md) | Data-at-rest encryption and keyring management: the master-key hierarchy, encrypting tablespaces/binlogs/redo-undo/temp files, the file/Vault/KMIP/AWS-KMS keyrings, and master-key rotation. |
+| [`mysql-audit-logging`](plugins/mysql-audit-logging/skills/mysql-audit-logging/SKILL.md) | The open-source Audit Log Filter: installing the component, the JSON filter rule DSL, assigning filters to users, and log formats/rotation/encryption. |
+| [`mysql-data-masking`](plugins/mysql-data-masking/skills/mysql-data-masking/SKILL.md) | Masking PII and generating synthetic test data with the open-source masking component: the `mask_*`/`gen_*` functions, dictionaries, and why it is a presentation layer, not access control. |
+| [`mysql-js-stored-procedures`](plugins/mysql-js-stored-procedures/skills/mysql-js-stored-procedures/SKILL.md) | Writing stored procedures and functions in JavaScript via the `js_lang` component (tech preview): syntax, privileges, the SQL↔JS type mapping, and the sandbox limits. |
+| [`oracle-to-percona`](plugins/oracle-to-percona/skills/oracle-to-percona/SKILL.md) | Migrating from Oracle Database: why it is a true rewrite (no Oracle-compatibility mode, unlike MariaDB), data-type mapping, and rewriting PL/SQL, sequences, `ROWNUM`, and `CONNECT BY`. |
+| [`xtrabackup-recipes`](plugins/xtrabackup-recipes/skills/xtrabackup-recipes/SKILL.md) | Hot physical backups with Percona XtraBackup - full, incremental, streamed, compressed, encrypted, restored. PS 8.0 vs 8.4 differences. |
+| [`percona-toolkit-recipes`](plugins/percona-toolkit-recipes/skills/percona-toolkit-recipes/SKILL.md) | When to reach for `pt-online-schema-change`, `pt-archiver`, `pt-query-digest`, `pt-table-checksum` instead of the obvious-but-wrong alternative. |
+| [`pmm-operations`](plugins/pmm-operations/skills/pmm-operations/SKILL.md) | Percona Monitoring and Management: install, client agents, Query Analytics, custom queries, alerting. PMM 2 vs 3 (and why they don't interoperate). |
+| [`psmdb-features`](plugins/psmdb-features/skills/psmdb-features/SKILL.md) | Percona Server for MongoDB: hot backup, encryption, audit, LDAP/Kerberos/OIDC, in-memory engine - the MongoDB Enterprise features it ships free, with version gates. |
+| [`pbm-recipes`](plugins/pbm-recipes/skills/pbm-recipes/SKILL.md) | Percona Backup for MongoDB: logical/physical/incremental backups, PITR, selective restore, sharded clusters, the physical-restore footguns. |
+| [`pxc-galera-operations`](plugins/pxc-galera-operations/skills/pxc-galera-operations/SKILL.md) | Percona XtraDB Cluster: SST/IST, bootstrap after outage, flow control, split-brain/quorum, `pxc_strict_mode`, Clone SST. |
+| [`percona-operators-on-k8s`](plugins/percona-operators-on-k8s/skills/percona-operators-on-k8s/SKILL.md) | Operators for PXC/MongoDB/PostgreSQL/MySQL: CR patterns, backups, scaling, upgrades - and the per-operator field differences agents hallucinate. |
+| [`postgres-to-percona-pg`](plugins/postgres-to-percona-pg/skills/postgres-to-percona-pg/SKILL.md) | Migration from community PostgreSQL to Percona Distribution for PostgreSQL: the package-swap path, pg_tde TDE, pg_stat_monitor, and the Patroni/etcd/HAProxy HA stack. |
+| [`mongodb-to-psmdb`](plugins/mongodb-to-psmdb/skills/mongodb-to-psmdb/SKILL.md) | Migration from MongoDB Community or Atlas to Percona Server for MongoDB: in-place swap, the PCSM live-migration tool, FCV, and config gotchas. |
 
 ## Who it's for
 
@@ -65,28 +65,35 @@ Open an issue to propose one, or a PR to add it.
 
 ## Installing
 
-### With Node.js (`npx skills`)
+Percona Skills is a **Claude Code plugin marketplace**: one plugin per skill, so you install only the ones you want.
 
-The community [`skills` CLI](https://github.com/vercel-labs/skills) detects which agents you have installed and configures each one. Choose the skills you want from an interactive menu:
+### With Claude Code (recommended)
 
-```
-npx skills add Percona-Lab/skills
-```
-
-To pull a single skill:
+Add the marketplace once, then install any subset of the 19 plugins:
 
 ```
-npx skills add Percona-Lab/skills/mysql-to-percona
+/plugin marketplace add Percona-Lab/skills
+/plugin install mysql-to-percona@percona-skills
 ```
 
-### Without Node.js
+Browse and pick interactively instead:
 
-Each skill is a single `SKILL.md` file. Drop it into your agent's skill folder:
+```
+/plugin
+```
+
+Each plugin contributes one skill, invoked as `/<plugin-name>:<skill-name>` - for example `/mysql-to-percona:mysql-to-percona`. Skills still activate automatically whenever a prompt matches their `description`; the slash form is just for invoking one deliberately.
+
+> **The marketplace is named `percona-skills`**, deliberately distinct from the `percona-lab` marketplace in [Percona-Lab/claude-plugins](https://github.com/Percona-Lab/claude-plugins). Two marketplaces with the same name collide, so both can be added side by side.
+
+### Without Claude Code (other agents)
+
+Each skill is still a plain `SKILL.md`. The files now live one level deeper - `plugins/<skill-name>/skills/<skill-name>/SKILL.md`:
 
 ```bash
-# Claude Code / Claude Desktop
+# Claude Code / Claude Desktop, manual install
 mkdir -p ~/.claude/skills/mysql-to-percona
-curl -L https://raw.githubusercontent.com/Percona-Lab/skills/main/mysql-to-percona/SKILL.md \
+curl -L https://raw.githubusercontent.com/Percona-Lab/skills/main/plugins/mysql-to-percona/skills/mysql-to-percona/SKILL.md \
   -o ~/.claude/skills/mysql-to-percona/SKILL.md
 ```
 
@@ -96,6 +103,20 @@ curl -L https://raw.githubusercontent.com/Percona-Lab/skills/main/mysql-to-perco
 
 The agent reads each skill's `description` frontmatter at startup and loads the file on demand whenever a user prompt matches.
 
+Four skills (`percona-operators-on-k8s`, `percona-toolkit-recipes`, `pxc-galera-operations`, `xtrabackup-recipes`) also ship a `references/` directory alongside `SKILL.md`; copy the whole skill directory, not just the one file.
+
+### Moved: the old root-level layout is gone
+
+Skills used to sit at the repo root (`mysql-to-percona/SKILL.md`). They now live at `plugins/<skill-name>/skills/<skill-name>/SKILL.md` so each one is an installable plugin. If you installed from the old layout:
+
+- **`npx skills add Percona-Lab/skills`** and **`npx skills add Percona-Lab/skills/<skill-name>`** no longer resolve. The [`skills` CLI](https://github.com/vercel-labs/skills) looks for skills at the repo root. Use the Claude Code marketplace above, or the `curl` path with the new nested URL.
+- **Old raw-content URLs 404.** Any `raw.githubusercontent.com/Percona-Lab/skills/main/<skill-name>/SKILL.md` must gain the `plugins/<skill-name>/skills/` prefix.
+- **Existing installs keep working** - files already copied into `~/.claude/skills/` are untouched. They just will not update from the old paths; re-install to pick up changes.
+- **Symlinked clones break.** A `ln -s ~/code/percona-skills/<skill-name>` now points at nothing. Re-point at `plugins/<skill-name>/skills/<skill-name>`.
+- **Bookmarks and doc links** to root-level skill paths need the new prefix.
+
+Nothing inside any `SKILL.md` changed in this move - only its location.
+
 ### Pair with Percona DK (recommended)
 
 For full value, also run the Percona Developer Knowledge MCP. Today it's self-hosted - one line clones it, builds the local index, and auto-configures Claude Code, Claude Desktop, Cursor, and Windsurf:
@@ -104,7 +125,7 @@ For full value, also run the Percona Developer Knowledge MCP. Today it's self-ho
 curl -fsSL https://raw.githubusercontent.com/Percona-Lab/percona-dk/main/install-percona-dk | bash
 ```
 
-See [`percona-dk-mcp/SKILL.md`](percona-dk-mcp/SKILL.md) and the [percona-dk README](https://github.com/Percona-Lab/percona-dk) for per-tool setup. A hosted public endpoint is coming soon. Without DK, the skills still work; the agent will note when an answer would benefit from fresher docs.
+See [`percona-dk-mcp/SKILL.md`](plugins/percona-dk-mcp/skills/percona-dk-mcp/SKILL.md) and the [percona-dk README](https://github.com/Percona-Lab/percona-dk) for per-tool setup. A hosted public endpoint is coming soon. Without DK, the skills still work; the agent will note when an answer would benefit from fresher docs.
 
 ## Prior art
 

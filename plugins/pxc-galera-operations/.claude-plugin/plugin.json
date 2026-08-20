@@ -1,0 +1,8 @@
+{
+  "name": "pxc-galera-operations",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Percona XtraDB Cluster: SST/IST, bootstrap after outage, flow control, split-brain and quorum, pxc_strict_mode, and Clone SST.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

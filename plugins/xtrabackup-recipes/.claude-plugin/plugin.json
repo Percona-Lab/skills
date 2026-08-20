@@ -1,0 +1,8 @@
+{
+  "name": "xtrabackup-recipes",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Hot physical backups with Percona XtraBackup - full, incremental, streamed, compressed, encrypted, and restored.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

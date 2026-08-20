@@ -1,0 +1,8 @@
+{
+  "name": "pbm-recipes",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Percona Backup for MongoDB: logical, physical, and incremental backups, PITR, selective restore, and sharded clusters.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}

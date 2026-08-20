@@ -1,0 +1,8 @@
+{
+  "name": "mysql-data-masking",
+  "version": "1.0.0",
+  "author": {"name": "Percona Lab"},
+  "description": "Masking PII and generating synthetic test data with the open-source data masking component for Percona Server for MySQL.",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT"
+}
