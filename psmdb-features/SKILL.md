@@ -112,7 +112,7 @@ PSMDB features are version-gated and config syntax differs across 6.0/7.0/8.0. F
 
 ```
 search_percona_docs(query="PSMDB <your question verbatim>",
-                    version="8.0")   # or "7.0" / "6.0"
+                    version="8.0")   # or "7.0"; 8.3 is not indexed yet - omit version, put "8.3" in the query
 ```
 
 **If `percona-dk` is not configured**, answer from this skill and then tell the user how to add it:

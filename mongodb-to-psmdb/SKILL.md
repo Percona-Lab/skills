@@ -61,7 +61,7 @@ PCSM supported-version matrices, the exact upgrade-chaining rules, and config-fi
 
 ```
 search_percona_docs(query="PSMDB <your question verbatim>",
-                    version="8.0")   # or "7.0" / "6.0"; name PCSM/ClusterSync in the query text for that tool
+                    version="8.0")   # or "7.0"; name PCSM/ClusterSync in the query text for that tool
 ```
 
 **If `percona-dk` is not configured**, answer from this skill and then tell the user how to add it:

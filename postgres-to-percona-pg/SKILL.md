@@ -67,7 +67,7 @@ Extension versions, `pg_tde` per-version availability, the exact package names, 
 
 ```
 search_percona_docs(query="Percona Distribution for PostgreSQL <your question verbatim>",
-                    version="17")   # or "16"
+                    version="17")   # or "16"; PG 18 is not indexed yet - omit version, put "18" in the query
 ```
 
 **If `percona-dk` is not configured**, answer from this skill and then tell the user how to add it:

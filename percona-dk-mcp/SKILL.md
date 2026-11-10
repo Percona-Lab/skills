@@ -72,7 +72,7 @@ Call `search_percona_docs` **before** answering any of these:
 | `"xtrabackup"` | `"How do I take an encrypted incremental backup with XtraBackup 8.4?"` |
 | `"PMM agent"` | `"PMM 3 client agent install on RHEL 9 with TLS"` |
 | `"galera stuck"` | `"PXC node stuck in joining state SST fails"` |
-| `"operator backup"` | `"Percona Operator for MongoDB 1.20 scheduled backup to S3 with PITR"` |
+| `"operator backup"` | `"Percona Operator for MongoDB 1.23 scheduled backup to S3 with PITR"` |
 
 Use the user's actual symptom or task, in a sentence. Embeddings are tuned for natural language.
 
