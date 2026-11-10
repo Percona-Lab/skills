@@ -47,17 +47,18 @@ systemctl start mysql@bootstrap.service       # bootstrap ONLY that node
 
 ## Clone SST (PXC 8.4)
 
-PXC 8.4 (8.4.4-x) adds MySQL Clone-plugin-based SST. Set `wsrep_sst_method=clone` on the joiner; `clone` must be in `wsrep_sst_allowed_methods` on both donor and joiner (8.4 default is `xtrabackup-v2, clone`). Requires the `CLONE_ADMIN` privilege and the NetCat package; default port 4444. (Clone is also available on the 8.0 line from 8.0.41+.) Both variables are read-only / config-file-only.
+PXC 8.4 (8.4.4-x) adds MySQL Clone-plugin-based SST. Set `wsrep_sst_method=clone` on the joiner; `clone` must be in `wsrep_sst_allowed_methods` on both donor and joiner (8.4 default is `xtrabackup-v2, clone`). Requires the `CLONE_ADMIN` privilege and the NetCat package; default port 4444. (On the 8.0 line, Clone SST exists from 8.0.41+ but is **tech preview** - test it before relying on it in production.) Clone SST encrypts with the MySQL `ssl-ca`/`ssl-cert`/`ssl-key` settings (or `clone_ssl_*` on the joiner); keep the certs outside the datadir. Both variables are read-only / config-file-only.
 
 ## Key variables
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `wsrep_cluster_address` | - | `gcomm://` peer list; empty = bootstrap |
-| `wsrep_sst_method` | `xtrabackup-v2` | SST method (`clone` in 8.4.4+ / 8.0.41+) |
-| `pxc_strict_mode` | `ENFORCING` | PK/engine/locking validation (`DISABLED`/`PERMISSIVE`/`ENFORCING`/`MASTER`) |
+| `wsrep_sst_method` | `xtrabackup-v2` | SST method (`clone` in 8.4.4+; 8.0.41+ as tech preview) |
+| `pxc_strict_mode` | `ENFORCING` | PK/engine/locking validation (`DISABLED`/`PERMISSIVE`/`ENFORCING`/`MASTER`); 8.4.11-11+ ENFORCING/MASTER also forces `sql_require_primary_key=ON` |
 | `wsrep_OSU_method` | `TOI` | DDL replication mode (`TOI`/`RSU`/`NBO`) |
 | `wsrep_provider_options` | - | e.g. `gcache.size=1G;pc.weight=2` |
+| `repl.force_sst_after_inconsistency` (provider option) | off | 8.4.11-11+: a node voted out for inconsistency, or failing an IST write-set, drops `grastate.dat` on shutdown and does a full SST on restart |
 | `innodb_autoinc_lock_mode` | must be `2` | Required by Galera |
 | `wsrep_applier_threads` | `1` | Parallel apply (tune to `wsrep_cert_deps_distance`); replaces deprecated `wsrep_slave_threads` |
 | `wsrep_sync_wait` | `0` | Causal-read consistency level |
@@ -95,7 +96,7 @@ GALERA_OPTIONS="socket.ssl_cipher=AES128-SHA256;socket.ssl_key=...;socket.ssl_ce
 
 ## Encryption & large transactions
 
-- **Traffic encryption** is ON by default (`pxc-encrypt-cluster-traffic=ON`, covers SST/IST/replication). All nodes must use **identical** cert files; changing it needs a full cluster stop. PXC 8.4 **removed** XtraBackup-level SST encryption (`[xtrabackup] encrypt=`) - rely on `pxc-encrypt-cluster-traffic`.
+- **Traffic encryption** is ON by default (`pxc-encrypt-cluster-traffic=ON`, covers SST/IST/replication). All nodes must use **identical** cert files; changing it needs a full cluster stop. PXC 8.4 **removed** XtraBackup-level SST encryption (`[xtrabackup] encrypt=`). The supported SST method is `[sst] encrypt=4` with `ssl-ca`/`ssl-cert`/`ssl-key`; it defaults to 4 when `pxc-encrypt-cluster-traffic=ON` and reverts to 0 if that is OFF. `transferfmt=nc` does not support `encrypt=4`.
 - **Huge transactions** - by default the whole write-set is buffered in memory (`wsrep_max_ws_size` 2 GB). Fragment a big batch with streaming replication instead:
   ```sql
   SET SESSION wsrep_trx_fragment_unit='rows';
@@ -105,3 +106,5 @@ GALERA_OPTIONS="socket.ssl_cipher=AES128-SHA256;socket.ssl_key=...;socket.ssl_ce
 ## Upgrades
 
 Rolling **8.0 -> 8.4**, one node at a time: remove 8.0 packages (keep datadir), install 8.4, start (auto-upgrade + SST/IST rejoin). Keep writes on 8.0 nodes during the mixed window and avoid 8.4-only DDL until done. PXC 8.4 switches the keyring plugin to a component and defaults to `caching_sha2_password` (needs ProxySQL >= 2.6.2).
+
+**8.4 -> 9.7:** target **9.7.2 or newer** - 8.4.11 -> 9.7.1 is unsupported.

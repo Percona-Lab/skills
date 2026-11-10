@@ -5,7 +5,7 @@ description: "Operating Percona XtraDB Cluster (PXC) - the Galera-based synchron
 
 # Percona XtraDB Cluster (PXC) / Galera Operations
 
-*Last updated: 2026-06-02*
+*Last updated: 2026-11-10*
 
 PXC is Percona Server for MySQL plus Galera: synchronous, virtually-multi-master replication where every node holds the full dataset and commits are certified cluster-wide. A transaction's write-set is broadcast to all nodes and certified before commit; if it conflicts with a concurrent transaction on any node, the committing node rolls back. A write confirmed anywhere is durable everywhere, or it never commits. The cost: commit latency grows with inter-node round-trips, and same-row writes from multiple nodes raise the certification-conflict rate. PXC is for **high availability and read scaling with zero divergence** - throughput is capped by the slowest node, so it is **not** a write-scaling solution. Most "it behaves weirdly" surprises come from Galera semantics, not MySQL.
 
@@ -24,7 +24,7 @@ Open ports: **3306** (SQL), **4567** (group comm), **4444** (SST), **4568** (IST
 
 | Likely agent answer | Closer to reality |
 |---|---|
-| Creating tables without a primary key | Galera requires a PRIMARY KEY on **every** table for write-set ordering and parallel apply. With `pxc_strict_mode=ENFORCING` (default), DML on PK-less tables is rejected. `wsrep_certify_nonPK` (on) can auto-generate one, but the documented rule is: **all tables must have a primary key.** |
+| Creating tables without a primary key | Galera requires a PRIMARY KEY on **every** table for write-set ordering and parallel apply. With `pxc_strict_mode=ENFORCING` (default), DML on PK-less tables is rejected. From **8.4.11-11 / 9.7.2-2**, ENFORCING/MASTER also sets `sql_require_primary_key=ON` globally: `CREATE`/`ALTER` of a PK-less table fails, and setting it `OFF` in those modes is an error. `wsrep_certify_nonPK` (on) can auto-generate one, but the documented rule is: **all tables must have a primary key.** |
 | Treating `COMMIT` as guaranteed once the DML statements succeed | Certification is optimistic and resolved at **commit time**: `COMMIT` can return `ERROR 1213` (certification conflict, not a local deadlock). The app must catch it and **retry the whole transaction.** |
 | Assuming MyISAM (or any non-InnoDB) data replicates | Only **InnoDB** is replicated. `wsrep_replicate_myisam` is **OFF** by default, so MyISAM DML is node-local -> silent divergence (DDL still replicates). MyISAM-in-cluster is experimental and discouraged. |
 | Expecting writes to all nodes to scale throughput | Throughput is capped by the slowest node; concurrent same-row writes across nodes just raise the 1213 conflict rate. PXC scales reads and gives HA, not write throughput. |
@@ -41,7 +41,7 @@ Open ports: **3306** (SQL), **4567** (group comm), **4444** (SST), **4568** (IST
 | HAProxy `option mysql-check` / raw TCP health check | Use `option httpchk` against `clustercheck` (port 9200) so `JOINING`/`DONOR` nodes are excluded from rotation. |
 | `pc.bootstrap=true` on a survivor during a network partition | Only when the other side is **confirmed down**. During a mere partition this creates two clusters and an eventual emergency shutdown + full SST. |
 | Different SSL certs per node | All nodes (and `garbd`) must share **identical** CA/cert/key files or they won't join. |
-| Using XtraBackup-level SST encryption (`[xtrabackup] encrypt=`) on PXC 8.4 | **Removed in 8.4** - PXC errors if it detects it. Use `pxc-encrypt-cluster-traffic` (on by default) for SST/IST/replication TLS. |
+| Using XtraBackup-level SST encryption (`[xtrabackup] encrypt=`) on PXC 8.4 | **Removed in 8.4** - PXC errors if it detects it. Use `[sst] encrypt=4` with `ssl-ca`/`ssl-cert`/`ssl-key` (defaults to 4 when `pxc-encrypt-cluster-traffic=ON`, the default). Clone SST uses the MySQL `ssl-*` settings instead. |
 
 ## Bootstrapping essentials
 
@@ -68,7 +68,7 @@ Full config and the bootstrap/join command sequence are in `references/operation
 
 ## pxc_strict_mode
 
-Values: `DISABLED`, `PERMISSIVE`, `ENFORCING` (default), `MASTER`. Default is `ENFORCING`, except a standalone/bootstrapping node defaults to `DISABLED`. ENFORCING blocks unsupported operations outright (no-PK DML, non-InnoDB writes, `innodb_autoinc_lock_mode != 2`, `LOCK TABLES`/`GET_LOCK()`, wrong `binlog_format`, Group Replication); PERMISSIVE logs and continues. Note: validation happens on the **originating** node - an op let through on a DISABLED node is not re-checked on ENFORCING peers.
+Values: `DISABLED`, `PERMISSIVE`, `ENFORCING` (default), `MASTER`. Default is `ENFORCING`, except a standalone/bootstrapping node defaults to `DISABLED`. ENFORCING blocks unsupported operations outright (no-PK DML - and from 8.4.11-11 / 9.7.2-2 no-PK `CREATE`/`ALTER` via `sql_require_primary_key=ON` - non-InnoDB writes, `innodb_autoinc_lock_mode != 2`, `LOCK TABLES`/`GET_LOCK()`, wrong `binlog_format`, Group Replication); PERMISSIVE logs and continues. Note: validation happens on the **originating** node - an op let through on a DISABLED node is not re-checked on ENFORCING peers.
 
 ## PXC vs async vs Group Replication
 
@@ -99,14 +99,14 @@ search_percona_docs(query="PXC <your question verbatim>",
 
 ## Key gotchas
 
-- **Primary key on every table; only InnoDB replicates.** No-PK DML and MyISAM writes don't replicate / get rejected.
+- **Primary key on every table; only InnoDB replicates.** No-PK DML and MyISAM writes don't replicate / get rejected; 8.4.11-11+ also rejects no-PK `CREATE`/`ALTER` under ENFORCING/MASTER.
 - **`COMMIT` can fail with error 1213** (certification conflict) - apps must retry the transaction.
 - **Never bootstrap into a running cluster.** It forks the cluster.
 - **`mysqld --wsrep-recover`** is how you pick the bootstrap node after an unclean full outage - not `safe_to_bootstrap`.
 - **Odd node counts** (3/5) or an arbitrator. Two-node clusters can't tolerate a failure.
 - **TOI DDL stalls the cluster** - use RSU/NBO or pt-online-schema-change for long ALTERs.
 - **PXC is HA + read scaling, not write scaling** - throughput is bounded by the slowest node.
-- **8.4 dropped XtraBackup-SST encryption** - rely on `pxc-encrypt-cluster-traffic`.
+- **8.4 dropped XtraBackup-SST encryption** - use `[sst] encrypt=4` + `ssl-*` (implied by `pxc-encrypt-cluster-traffic=ON`).
 
 ## Sources
 
@@ -118,5 +118,6 @@ search_percona_docs(query="PXC <your question verbatim>",
 - [Online schema upgrade (TOI/RSU/NBO)](https://docs.percona.com/percona-xtradb-cluster/8.4/online-schema-upgrade.html)
 - [Monitoring the cluster](https://docs.percona.com/percona-xtradb-cluster/8.4/monitoring.html)
 - [Load balancing with ProxySQL](https://docs.percona.com/percona-xtradb-cluster/8.4/load-balance-proxysql.html) · [HAProxy](https://docs.percona.com/percona-xtradb-cluster/8.4/haproxy.html)
-- [Galera Arbitrator (garbd)](https://docs.percona.com/percona-xtradb-cluster/8.4/garbd-howto.html) · [Encrypt traffic](https://docs.percona.com/percona-xtradb-cluster/8.4/encrypt-traffic.html)
+- [Galera Arbitrator (garbd)](https://docs.percona.com/percona-xtradb-cluster/8.4/garbd-howto.html) · [Encrypt traffic](https://docs.percona.com/percona-xtradb-cluster/8.4/encrypt-traffic.html) · [XtraBackup SST options](https://docs.percona.com/percona-xtradb-cluster/8.4/xtrabackup-sst.html)
+- [PXC 8.4.11-11 release notes](https://docs.percona.com/percona-xtradb-cluster/8.4/release-notes/8.4.11-11.html)
 - [wsrep system variables](https://docs.percona.com/percona-xtradb-cluster/8.0/wsrep-system-index/) · [wsrep provider options](https://docs.percona.com/percona-xtradb-cluster/8.0/wsrep-provider-index/)
