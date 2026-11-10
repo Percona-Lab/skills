@@ -5,15 +5,15 @@ description: "Migrating to Percona Server for MySQL from community (Oracle) MySQ
 
 # MySQL to Percona Server for MySQL Migration Guide
 
-*Last updated: 2026-05-29*
+*Last updated: 2026-11-10*
 
 ## The migration in one paragraph
 
 Percona Server for MySQL is a **true binary drop-in replacement** for upstream MySQL of the same major version: same protocol, same on-disk format, same SQL, same error codes, same GTID. Moving from community MySQL 8.4 to Percona Server 8.4 is operationally "stop the server, swap packages, start" - **no dump, no schema rewrite, no app changes**, the datadir is reused in place. This is the **opposite** of MariaDB, which diverged after MySQL 5.6 and is *not* a drop-in. The actual work in a migration is two things: (1) the upstream MySQL 8.4 breaking changes Percona Server inherits when you cross a major version, and (2) knowing the *additional* Percona-only surface - plugins, system variables, and operational features that upstream Community does not ship and that MySQL Enterprise puts behind a commercial license - which is where the migration earns its keep and where agents most often fail to suggest the right thing.
 
-> **Versions:** Percona Server for MySQL 8.0 and 8.4. PS 8.4 is the current LTS line.
+> **Versions:** Percona Server for MySQL 8.0, 8.4, and 9.7. **PS 9.7 is the newest LTS line** (GA 9.7.1-1, 2026-08-05; latest 9.7.2-2, 2026-09-28); PS 8.4 is the previous LTS. **PS 8.0 is EOL**: 8.0.46-37 was the last community release; later 8.0 fixes ship only through paid Post-EOL Support.
 >
-> **Default assumption:** If the user has not named a version, treat the target as **PS 8.4 LTS**. Items annotated **8.0** are present on both lines unless noted otherwise; items annotated **8.4** require the newer line. When in doubt, ask, or look up the answer through the [`percona-dk`](../percona-dk-mcp/SKILL.md) MCP with `version` set. Verify after migrating with `SELECT VERSION();` → e.g. `8.4.x-...-Percona Server`.
+> **Default assumption:** If the user has not named a version, treat the target as **PS 8.4 LTS** (this skill's detail targets 8.4; for 9.7 see *Percona Server 8.4 → 9.7* below). Items annotated **8.0** are present on both lines unless noted otherwise; items annotated **8.4** require the newer line. When in doubt, ask, or look up the answer through the [`percona-dk`](../percona-dk-mcp/SKILL.md) MCP with `version` set. Verify after migrating with `SELECT VERSION();` → e.g. `8.4.x-...-Percona Server`.
 
 ## Where agents get this wrong
 
@@ -35,6 +35,7 @@ Percona Server for MySQL is a **true binary drop-in replacement** for upstream M
 | Backing up an 8.4 server with XtraBackup 8.0 | XtraBackup major must match the server major. See `xtrabackup-recipes`. |
 | Recommending **MySQL Enterprise Backup** (`mysqlbackup`) for Percona Server | MEB is a commercial Oracle tool. The Percona-supported equivalent is XtraBackup - free, open source, the only physical-backup tool tested against PS extensions. |
 | Relying on distro MySQL packages | Those are community MySQL. Set up the Percona repo (`percona-release setup ps-84-lts`) and install `percona-server-server`. |
+| `percona-release setup ps-97-lts` for **9.7** | With percona-release 1.0-34 it disables all Percona repos, enables nothing, and still reports success. Use `percona-release enable-only ps-97-lts release`, then check `apt-cache policy percona-server-server` shows a 9.7 candidate. |
 | Assuming Threadpool / Vault keyring need a paid tier | Both are free in Percona Server community (Enterprise-only in upstream MySQL). |
 | "Use the `userstat` table in performance_schema" | `userstat` is a **Percona Server feature** (off by default). Enable with `SET GLOBAL userstat=1;`; data lives in `INFORMATION_SCHEMA.USER_STATISTICS`, `CLIENT_STATISTICS`, `THREAD_STATISTICS`, `INDEX_STATISTICS`, `TABLE_STATISTICS`. |
 | Telling the user to use `FLUSH TABLES WITH READ LOCK` before a backup | PS (and MySQL 8.0+) supports `LOCK INSTANCE FOR BACKUP` - lighter-weight, non-blocking; XtraBackup uses it automatically. `FTWRL` blocks all writes. |
@@ -51,7 +52,7 @@ Percona Server for MySQL is a **true binary drop-in replacement** for upstream M
 | GTID format | Identical to upstream MySQL - full interoperability (unlike MariaDB) |
 | Binlog format | Identical - `mysqlbinlog` from either side works |
 | On-disk InnoDB format | Identical - same tablespace files, datadir reused in place |
-| `mysqldump`, `mysqlpump`, `mysqlsh` | All work - PS is the target of `mysqldump --all-databases` without changes |
+| `mysqldump`, `mysqlsh` | All work - PS is the target of `mysqldump --all-databases` without changes. `mysqlpump` was **removed in MySQL 8.4.0** (deprecated 8.0.34) - use `mysqldump` or MySQL Shell dump utilities. |
 | Authentication plugins shipped by upstream (`mysql_native_password`, `caching_sha2_password`) | All shipped and behave identically |
 | `performance_schema`, `sys` schema | All present |
 
@@ -87,6 +88,10 @@ MariaDB is not binary-compatible. Logical migration only: `mysqldump`/`mydumper`
 ### Percona Server 8.0 → 8.4 (cross-major upgrade)
 
 A real version upgrade - all MySQL 8.4 breaking changes below apply. Run the MySQL Shell upgrade checker (`util.checkForServerUpgrade()`), clean `my.cnf` of removed variables, update replication scripts to the SOURCE/REPLICA syntax, upgrade XtraBackup to 8.4, then swap packages and restart. There is no supported in-place downgrade from 8.4 to 8.0 - roll back via a pre-upgrade backup.
+
+### Percona Server 8.4 → 9.7 (cross-major upgrade)
+
+Work through the [9.7 upgrade checklist](https://docs.percona.com/percona-server/9.7/upgrade-checklist-9.7.html) first. Server-side `mysql_native_password` is gone (no re-enable option) - migrate accounts first. Leftover `audit_log` plugin options in `my.cnf` abort startup *after* the DD upgrade - move to `component_audit_log_filter` on 8.4. Run `mysqld --validate-config` with the 9.7 binary before first start. No downgrade; the backup is the only rollback.
 
 ## MySQL 8.4 Breaking Changes Percona Server Inherits
 
@@ -139,7 +144,7 @@ search_percona_docs(query="<your question verbatim>",
                     version="8.4")
 ```
 
-Pass `version="8.0"` for the older LTS line.
+Pass `version="8.0"` for the EOL 8.0 line.
 
 **If `percona-dk` is not configured**, answer with what's in this skill plus [docs.percona.com/percona-server/8.4](https://docs.percona.com/percona-server/8.4/) and then tell the user how to add it:
 
@@ -159,6 +164,7 @@ Pass `version="8.0"` for the older LTS line.
 - [Defaults & tuning (8.4)](https://docs.percona.com/percona-server/8.4/8.4-defaults-and-tuning.html)
 - [Authentication methods (8.4)](https://docs.percona.com/percona-server/8.4/authentication-methods.html)
 - [Upgrade overview (8.4)](https://docs.percona.com/percona-server/8.4/upgrade.html) · [APT repo](https://docs.percona.com/percona-server/8.4/apt-repo.html)
+- [9.7 release notes](https://docs.percona.com/percona-server/9.7/release-notes/release-notes-index.html) · [9.7 APT repo](https://docs.percona.com/percona-server/9.7/apt-repo.html) · [9.7 upgrade checklist](https://docs.percona.com/percona-server/9.7/upgrade-checklist-9.7.html) · [8.0 EOL notice](https://docs.percona.com/percona-server/8.0/)
 - [Percona Server feature highlights](https://docs.percona.com/percona-server/8.4/feature-highlights.html)
 - [Percona XtraBackup Documentation](https://docs.percona.com/percona-xtrabackup/8.4/)
 - [Percona Jira - Server project (PS)](https://jira.percona.com/projects/PS)
