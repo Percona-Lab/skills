@@ -5,11 +5,13 @@ description: "When and how to reach for Percona Toolkit - the long-standing coll
 
 # Percona Toolkit Recipes
 
-*Last updated: 2026-05-29*
+*Last updated: 2026-11-10*
 
 ## What's in the box
 
 Percona Toolkit is a set of ~30 single-purpose CLI tools (`pt-*`) that wrap dangerous, repetitive, or under-documented MySQL operations behind safer interfaces. It is open source (GPLv2), installs as a single package on Linux, has no daemons, and works against Percona Server, upstream MySQL, MariaDB, and AWS RDS / Aurora MySQL. The tools are mostly server-version independent and connect via DSN syntax (`h=host,P=port,D=db,t=table,u=user,p=pass`).
+
+> **Minimum version: 3.7.1+** (latest 3.7.2, 2026-10-22). pt-osc 3.7.0 lost data on `ALTER … RENAME COLUMN` ([PT-2418](https://jira.percona.com/browse/PT-2418)) - do not use 3.7.0. 3.7.2 removed `pt-slave-delay` (PT-2573), added a `Db:` column to default `pt-kill` output (breaks parsers, PT-2541), and renamed pt-show-grants `--convert-MariaDB` → `--convert-from-mariadb` (PT-2564). Check with `pt-online-schema-change --version`.
 
 The five tools below cover ~90% of real-world use. The other ~25 exist for diagnostics, replication forensics, and one-off operations - reach for them when you know what you need.
 
@@ -54,6 +56,7 @@ See [references/tools.md](references/tools.md) for the deep per-tool flag catalo
 | Trusting `SHOW REPLICA STATUS\G` `Seconds_Behind_Source` for lag SLOs / automation | That counter is the I/O delay of the most recently applied event; it goes to 0 when the SQL thread is idle even if a long-running statement is mid-execution. Use `pt-heartbeat --monitor` for real, wall-clock lag. |
 | "Replicas are consistent because replication is running." | Replication running ≠ replicas in sync. Use `pt-table-checksum` from the source to detect drift across all replicas, then `pt-table-sync` to repair. |
 | `pt-table-sync --execute h=src,... dst` in a source↔source topology | Writes directly to `dst` and replicates back, corrupting `src`. Use `--sync-to-source` so fixes flow through replication, never written straight to a replica. |
+| Parsing `pt-kill --print` output with a fixed column layout | 3.7.2+ adds a `Db:` column to the default output (PT-2541). Update scripts that relied on the old format. |
 | `pt-kill --busy-time 60 --kill` expecting all matches to die | Default `--victims oldest` kills only the oldest per class. Use `--victims all`; `--kill-query` cancels the query but keeps the connection. |
 | Recommending `gh-ost` over `pt-online-schema-change` without qualification | Both are valid. `pt-osc` is older, trigger-based, ships with PS, requires no extra setup (works on PXC with `wsrep_OSU_method=TOI`). `gh-ost` is binlog-based (needs ROW binlog), no triggers, GitHub-maintained. Default to `pt-osc` for PS environments; suggest `gh-ost` when triggers are not acceptable. |
 | `p=secret` in a DSN on the command line | Passwords on the CLI leak via `ps` and shell history. Use `F=/root/.my.cnf` or `--ask-pass`. |
@@ -93,6 +96,7 @@ search_percona_docs(query="<your question verbatim>",
 - [pt-query-digest reference](https://docs.percona.com/percona-toolkit/pt-query-digest.html)
 - [pt-table-checksum reference](https://docs.percona.com/percona-toolkit/pt-table-checksum.html) · [pt-table-sync reference](https://docs.percona.com/percona-toolkit/pt-table-sync.html)
 - [pt-heartbeat](https://docs.percona.com/percona-toolkit/pt-heartbeat.html) · [pt-kill](https://docs.percona.com/percona-toolkit/pt-kill.html) · [pt-upgrade](https://docs.percona.com/percona-toolkit/pt-upgrade.html) · [pt-stalk](https://docs.percona.com/percona-toolkit/pt-stalk.html) · [pt-config-diff](https://docs.percona.com/percona-toolkit/pt-config-diff.html)
+- [Percona Toolkit release notes](https://docs.percona.com/percona-toolkit/release_notes.html) · [pt-pmp](https://docs.percona.com/percona-toolkit/pt-pmp.html)
 - [Percona Jira - PT project](https://jira.percona.com/projects/PT)
 
 *Each tool also has full docs via `man pt-<tool>` and `pt-<tool> --help`.*

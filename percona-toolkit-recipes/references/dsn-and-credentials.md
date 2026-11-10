@@ -4,7 +4,7 @@ DSN syntax, credential handling, and package installation steps. Load this when 
 
 ## DSNs & credentials
 
-Tools take a DSN: `h=host,P=3306,u=user,p=pass,D=db,t=table,S=/sock,F=/path/my.cnf`. **Never put `p=secret` on the command line** (visible in `ps`, saved to shell history) - use `F=/root/.my.cnf` (reads the `[client]` stanza) or `--ask-pass`. Escape commas in passwords as `\,`.
+Tools take a DSN: `h=host,P=3306,u=user,p=pass,D=db,t=table,S=/sock,F=/path/my.cnf`. **Never put `p=secret` on the command line** (visible in `ps`, saved to shell history) - use `F=/root/.my.cnf` (reads the `[client]` stanza) or `--ask-pass`. Escape commas in passwords as `\,`. For TLS, use DSN key `s` (`mysql_ssl`, 3.7.1+, PT-191); `o` (`mysql_ssl_optional`, 3.7.2+) makes SSL optional instead of strict.
 
 ```ini
 # /root/.my.cnf  →  then DSNs shrink to just D=shop,t=orders
