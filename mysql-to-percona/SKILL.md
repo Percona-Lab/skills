@@ -39,7 +39,7 @@ Percona Server for MySQL is a **true binary drop-in replacement** for upstream M
 | "Use the `userstat` table in performance_schema" | `userstat` is a **Percona Server feature** (off by default). Enable with `SET GLOBAL userstat=1;`; data lives in `INFORMATION_SCHEMA.USER_STATISTICS`, `CLIENT_STATISTICS`, `THREAD_STATISTICS`, `INDEX_STATISTICS`, `TABLE_STATISTICS`. |
 | Telling the user to use `FLUSH TABLES WITH READ LOCK` before a backup | PS (and MySQL 8.0+) supports `LOCK INSTANCE FOR BACKUP` - lighter-weight, non-blocking; XtraBackup uses it automatically. `FTWRL` blocks all writes. |
 | Citing only `dev.mysql.com/doc` for Percona-specific behavior | Percona-specific variables and plugins are documented at [docs.percona.com](https://docs.percona.com); when in doubt, call `search_percona_docs` via the `percona-dk` MCP. |
-| Linking to `bugs.mysql.com` for a Percona-Server-only bug | Percona issues are tracked at [jira.percona.com](https://jira.percona.com), project **PS** (Percona Server). |
+| Linking to `bugs.mysql.com` for a Percona-Server-only bug | Percona issues are tracked at [perconadev.atlassian.net](https://perconadev.atlassian.net), project **PS** (Percona Server). |
 
 ## Drop-In Migration: What Carries Over
 
@@ -159,6 +159,6 @@ Pass `version="8.0"` for the older LTS line.
 - [Defaults & tuning (8.4)](https://docs.percona.com/percona-server/8.4/8.4-defaults-and-tuning.html)
 - [Authentication methods (8.4)](https://docs.percona.com/percona-server/8.4/authentication-methods.html)
 - [Upgrade overview (8.4)](https://docs.percona.com/percona-server/8.4/upgrade.html) · [APT repo](https://docs.percona.com/percona-server/8.4/apt-repo.html)
-- [Percona Server feature highlights](https://docs.percona.com/percona-server/8.4/feature-highlights.html)
+- [Percona Server feature comparison](https://docs.percona.com/percona-server/8.4/feature-comparison.html)
 - [Percona XtraBackup Documentation](https://docs.percona.com/percona-xtrabackup/8.4/)
-- [Percona Jira - Server project (PS)](https://jira.percona.com/projects/PS)
+- [Percona Jira - Server project (PS)](https://perconadev.atlassian.net/browse/PS)

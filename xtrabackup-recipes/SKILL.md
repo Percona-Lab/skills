@@ -91,9 +91,9 @@ For full worked recipes - full backup with grants, incremental chains (and page 
 
 - [Percona XtraBackup 8.4 Documentation](https://docs.percona.com/percona-xtrabackup/8.4/)
 - [Percona XtraBackup 8.0 Documentation](https://docs.percona.com/percona-xtrabackup/8.0/)
-- [Privileges required for XtraBackup](https://docs.percona.com/percona-xtrabackup/8.4/using_xtrabackup/privileges.html)
+- [Privileges required for XtraBackup](https://docs.percona.com/percona-xtrabackup/8.4/privileges.html)
 - [Server/backup version comparison](https://docs.percona.com/percona-xtrabackup/8.4/server-backup-version-comparison.html)
 - [Point-in-time recovery](https://docs.percona.com/percona-xtrabackup/8.4/point-in-time-recovery.html)
 - [Restore individual tables](https://docs.percona.com/percona-xtrabackup/8.4/restore-individual-tables.html)
-- [xbcloud documentation](https://docs.percona.com/percona-xtrabackup/8.4/xbcloud/xbcloud.html)
-- [Percona Jira - PXB project](https://jira.percona.com/projects/PXB)
+- [xbcloud documentation](https://docs.percona.com/percona-xtrabackup/8.4/xbcloud-binary-overview.html)
+- [Percona Jira - PXB project](https://perconadev.atlassian.net/browse/PXB)
