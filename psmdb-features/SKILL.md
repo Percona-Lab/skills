@@ -1,15 +1,15 @@
 ---
 name: psmdb-features
-description: "What Percona Server for MongoDB (PSMDB) adds beyond MongoDB Community Edition, and how to configure it. Use this skill when the user asks about PSMDB hot backup, data-at-rest encryption, audit logging, LDAP/Kerberos/OIDC authentication, the in-memory storage engine, log redaction, or 'how do I get MongoDB Enterprise feature X for free'. PSMDB is a drop-in replacement for MongoDB Community that ships most MongoDB Enterprise features as open source. KEY POINT - several features are version-gated (KMIP and Kerberos since 6.0.2-1, OIDC since 7.0, OpenBao KMS in 8.0) and the Transparent Huge Pages requirement REVERSES at 8.0; agents that assume uniform behavior across 6.0/7.0/8.0 will emit wrong config. PSMDB does NOT include SNMP monitoring."
+description: "What Percona Server for MongoDB (PSMDB) adds beyond MongoDB Community Edition, and how to configure it. Use this skill when the user asks about PSMDB hot backup, data-at-rest encryption, audit logging, LDAP/Kerberos/OIDC authentication, the in-memory storage engine, log redaction, or 'how do I get MongoDB Enterprise feature X for free'. PSMDB is a drop-in replacement for MongoDB Community that ships most MongoDB Enterprise features as open source. KEY POINT - several features are version-gated (OIDC since 7.0, OpenBao KMS since 7.0.24-13 / 8.0.16-5; 6.0 is EOL) and the Transparent Huge Pages requirement REVERSES at 8.0; agents that assume uniform behavior across 7.0/8.0/8.3 will emit wrong config. PSMDB does NOT include SNMP monitoring."
 ---
 
 # Percona Server for MongoDB (PSMDB) Features
 
-*Last updated: 2026-06-02*
+*Last updated: 2026-11-10*
 
 PSMDB is a source-available, drop-in replacement for MongoDB Community Edition that adds, for free, most of what MongoDB charges for in Enterprise. Same wire protocol, same drivers. The value is the extra surface: hot backup, data-at-rest encryption, auditing, external auth, the in-memory engine, and log redaction.
 
-> **Versions:** PSMDB **6.0**, **7.0**, **8.0** (all maintained). 8.0 tracks MongoDB Community 8.0.x. Several features are version-gated - see each section.
+> **Versions:** PSMDB **7.0**, **8.0**, **8.3** maintained. **8.3 is GA** since 8.3.13-4 (2026-10-27); upgrade to 8.3 only from 8.0. **6.0 is EOL** (last release 6.0.25-20) - recommend upgrading, don't plan new 6.0 deployments. Several features are version-gated - see each section.
 
 ## What PSMDB adds beyond MongoDB Community
 
@@ -35,8 +35,8 @@ PSMDB is a source-available, drop-in replacement for MongoDB Community Edition t
 | "Enable encryption on the existing database" | Data-at-rest encryption can only be enabled on an **empty** database at first `mongod` start. You cannot toggle it (or change cipher mode) on a server that already has data - it requires wiping `dbPath` and re-syncing/restoring. |
 | Treating hot backup as a cluster-consistent backup | `createBackup` is **per-node and physical** - it snapshots one `mongod`'s data dir with no cross-replica-set or cross-shard coordination. For consistent replica-set / sharded backups use **Percona Backup for MongoDB (PBM)** - see the `pbm-recipes` skill. |
 | Configuring OIDC on PSMDB 6.0 | OIDC/OAuth 2.0 is **7.0+**. The 6.0 authentication docs have no OIDC section. |
-| Configuring KMIP or Kerberos on a base 6.0 install | Both were added in **6.0.2-1**, not at 6.0.0. |
-| Pointing at OpenBao as a KMS on 6.0 | OpenBao is documented as a key server in **8.0**; 6.0 lists Vault, KMIP, and keyfile only. |
+| Configuring KMIP or Kerberos on 6.0 | **6.0 is EOL** - upgrade to 7.0+ first. (On 6.0 both needed 6.0.2-1+.) |
+| "OpenBao needs 8.0" / OpenBao on 6.0 | OpenBao KMS arrived in **7.0.24-13** and **8.0.16-5**. Not in 6.0 (EOL). |
 | Assuming PSMDB's LDAP is identical to MongoDB Enterprise native LDAP | PSMDB's documented LDAP authentication uses the **`saslauthd` SASL proxy** model and is labeled "(legacy)". LDAP **authorization** (direct bind) is a separate feature. Don't conflate them or assume Enterprise's exact config transfers. |
 
 ## Recipe: hot backup (single node, physical)
@@ -74,7 +74,7 @@ security:
     serverCAFile: /etc/mongodb/vault.crt
 ```
 
-KMIP since 6.0.2-1; OpenBao in 8.0.
+OpenBao since 7.0.24-13 / 8.0.16-5.
 
 ## Recipe: audit logging
 
@@ -128,7 +128,8 @@ search_percona_docs(query="PSMDB <your question verbatim>",
 - **THP polarity flips at 8.0** - enable for 8.0+, disable for 7.0 and earlier.
 - **Encryption is set once, on an empty dbPath.** Not togglable on a populated server.
 - **Hot backup is per-node, not cluster-consistent.** Use PBM for replica sets and shards.
-- **Version gates:** KMIP + Kerberos = 6.0.2-1+; OIDC = 7.0+; OpenBao KMS = 8.0.
+- **Version gates:** OIDC = 7.0+; OpenBao KMS = 7.0.24-13+ / 8.0.16-5+. 6.0 is EOL - upgrade.
+- **Tarballs no longer ship Database Tools** from 8.0.34-15 / 8.3.13-4 (RPM/DEB unaffected). Pro builds were sunset in 8.0.16-5; former Pro features are in public builds.
 - **No SNMP.** PSMDB is not full Enterprise parity.
 
 ## Sources
@@ -138,3 +139,4 @@ search_percona_docs(query="PSMDB <your question verbatim>",
 - [Data-at-rest encryption](https://docs.percona.com/percona-server-for-mongodb/8.0/data-at-rest-encryption.html)
 - [Audit logging](https://docs.percona.com/percona-server-for-mongodb/8.0/audit-logging.html)
 - [Authentication](https://docs.percona.com/percona-server-for-mongodb/8.0/authentication.html) · [In-memory engine](https://docs.percona.com/percona-server-for-mongodb/8.0/inmemory.html)
+- Release notes: [8.3.13-4 (8.3 GA)](https://docs.percona.com/percona-server-for-mongodb/8.3/release_notes/8.3.13-4.html) · [8.0.16-5 (OpenBao, Pro sunset)](https://docs.percona.com/percona-server-for-mongodb/8.0/release_notes/8.0.16-5.html) · [7.0.24-13 (OpenBao)](https://docs.percona.com/percona-server-for-mongodb/7.0/release_notes/7.0.24-13.html) · [Upgrade 8.0 → 8.3](https://docs.percona.com/percona-server-for-mongodb/8.3/install/upgrade-from-80.html)
