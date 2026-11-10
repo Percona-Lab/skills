@@ -5,7 +5,7 @@ description: "Diagnosing slow queries and designing indexes on Percona Server fo
 
 # Query Optimization on Percona Server for MySQL
 
-*Last updated: 2026-05-26*
+*Last updated: 2026-11-10*
 
 Percona Server extends MySQL's diagnostics at every layer: `userstat` adds live per-index/per-table/per-user counters to `INFORMATION_SCHEMA`; the extended slow query log (`log_slow_verbosity`) records rows examined, query-plan flags, and InnoDB I/O per query. These feed `pt-query-digest` and PMM Query Analytics. The result is far more signal than stock MySQL `EXPLAIN` alone. Generic indexing principles still apply - but on Percona Server you can *measure* instead of guess.
 
@@ -48,7 +48,7 @@ Key Percona-only knobs:
 
 | Variable | Purpose |
 |---|---|
-| `log_slow_verbosity` | What to record: `microtime`, `query_plan`, `innodb`, `profiling` (aliases: `minimal`/`standard`/`full`) |
+| `log_slow_verbosity` | What to record: `microtime`, `query_plan`, `innodb`, `profiling`, `query_info` (adds `Query_tables`, `Query_digest`; off by default) (aliases: `minimal`/`standard`/`full`) |
 | `log_slow_filter` | Log only matching queries: `full_scan`, `full_join`, `tmp_table_on_disk`, `filesort_on_disk`, … |
 | `log_slow_rate_limit` + `log_slow_rate_type` | Sample 1-in-N queries (`session` or `query` granularity) |
 | `slow_query_log_use_global_control` | Apply global values to existing sessions (`all`) |
@@ -88,9 +88,9 @@ Also: `CLIENT_STATISTICS` (per IP), `THREAD_STATISTICS` (needs `thread_statistic
 - **`EXPLAIN FORMAT=TREE`** (8.0.16+) / `FORMAT=JSON` - readable iterator tree with costs.
 - **Histograms** - for skewed, non-indexed columns used in `WHERE`:
   ```sql
-  ANALYZE TABLE orders UPDATE HISTOGRAM ON status, region WITH 200 BUCKETS;
+  ANALYZE TABLE orders UPDATE HISTOGRAM ON status, region WITH 200 BUCKETS AUTO UPDATE;
   ```
-  (Percona Server 8.4.0-1+ auto-refreshes histograms on `ANALYZE TABLE`.)
+  (8.4+, upstream MySQL: auto-refresh on later `ANALYZE TABLE` and InnoDB persistent-stats recalculation is **opt-in** via `AUTO UPDATE`. The default is `MANUAL UPDATE` - without the clause the histogram goes stale until you rebuild it.)
 - **Invisible indexes** - test-before-drop safely:
   ```sql
   ALTER TABLE t ALTER INDEX idx INVISIBLE;   -- maintained but ignored by optimizer
