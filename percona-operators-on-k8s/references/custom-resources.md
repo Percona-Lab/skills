@@ -12,12 +12,12 @@ metadata:
   name: cluster1                  # ≤22 chars
   finalizers: [percona.com/delete-pods-in-order]
 spec:
-  crVersion: "1.19.1"             # match the installed operator
+  crVersion: "1.20.0"             # match the installed operator
   secretsName: cluster1-secrets
   updateStrategy: SmartUpdate
   pxc:
     size: 3                       # odd: 3 or 5; else needs unsafeFlags.pxcSize
-    image: percona/percona-xtradb-cluster:8.4.7-7.1
+    image: percona/percona-xtradb-cluster:8.4.8-8.1   # 8.0 line: 8.0.45-36.1
     volumeSpec:
       persistentVolumeClaim:
         resources: { requests: { storage: 50Gi } }
@@ -26,6 +26,8 @@ spec:
     size: 3
   # unsafeFlags: { pxcSize: true }   # only to allow non-standard sizes
 ```
+
+PS-operator `unsafeFlags` are different: `mysqlSize`, `orchestrator`, `orchestratorSize`, `proxy`, `proxySize`, `asyncFailoverWithPossibleDataLoss`, `backupNonReadyCluster`. PS apiVersion is `ps.percona.com/v1`.
 
 ```yaml
 # PostgreSQL - note the apiVersion group and 'replicas' (not 'size')
@@ -120,6 +122,6 @@ Operator version must be ≥ the cluster's `crVersion`; upgrade order is operato
 
 - **Pause/resume:** `spec.pause: true|false`. **Delete keeps PVCs** by default - add the `percona.com/delete-pxc-pvc` finalizer to drop data too.
 - **TLS:** auto-provisioned when **cert-manager** is installed (90-day certs); `spec.sslSecretName` (external) and `spec.sslInternalSecretName` (internal) name the Secrets.
-- **Monitoring:** `spec.pmm.enabled: true` with `image: percona/pmm-client:3` and a `serverHost`. Auth differs by PMM major: PMM 3 uses a service-account **token** (`pmmservertoken`), PMM 2 uses an API **key** (`pmmserverkey`). See [pmm-operations](../../pmm-operations/SKILL.md).
+- **Monitoring:** `spec.pmm.enabled: true` with `image: percona/pmm-client:3` and a `serverHost`. Auth differs by PMM major: PMM 3 uses a service-account **token** (`pmmservertoken`), PMM 2 uses an API **key** (`pmmserverkey`) - PMM2 is deprecated in PXC operator v1.20.0 and dropped in v1.22.0 (PG operator removed it in v3.1.0). See [pmm-operations](../../pmm-operations/SKILL.md).
 - **Debug a stuck reconcile:** `kubectl describe pxc cluster1` (events) → `kubectl logs <pod> -c pxc`.
 - **HA hygiene:** spread pods with `spec.pxc.affinity.antiAffinityTopologyKey`, protect quorum with `spec.pxc.podDisruptionBudget`.
