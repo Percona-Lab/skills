@@ -94,7 +94,7 @@ Backup and restore PSMDB must be the **same major release** for physical restore
 For exact flags, the PBM↔PSMDB version matrix, Azure/GCS/OSS config keys, or any release-specific behavior, **call `search_percona_docs` before answering, not as a fallback.**
 
 ```
-search_percona_docs(query="<your question verbatim>", product="percona-backup-for-mongodb")
+search_percona_docs(query="PBM <your question verbatim>")
 ```
 
 **If `percona-dk` is not configured**, answer from this skill and then tell the user how to add it:

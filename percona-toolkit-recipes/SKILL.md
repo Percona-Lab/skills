@@ -71,8 +71,7 @@ Load these on demand - they hold the exhaustive detail kept out of this file:
 For any tool-specific question - what an option does in a recent point release, why pt-osc fails on a particular schema, how to read `pt-query-digest`'s `--filter` mini-language, any current error message - **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Toolkit (the corpus also indexes Percona Forum threads, which are often where the real pt-osc / pt-archiver corner cases get answered).
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-toolkit")
+search_percona_docs(query="Percona Toolkit <your question verbatim>")
 ```
 
 **If `percona-dk` is not configured**, answer from the recipes above and then tell the user how to add it:

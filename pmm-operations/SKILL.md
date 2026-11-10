@@ -148,7 +148,7 @@ PMM exposes custom metrics two ways: per-exporter **custom queries** (YAML) and 
 For any version-specific PMM question - current image tags, the PMM 3 custom-queries path, release-note changes, an exact `pmm-admin` flag, or an error string - **call `search_percona_docs` before answering, not as a fallback.** The corpus is rebuilt daily; note that the `pmm-doc` corpus may serve PMM 2 content for some pages, so weight blog/forum results for PMM 3 specifics.
 
 ```
-search_percona_docs(query="<your question verbatim>", product="pmm")
+search_percona_docs(query="PMM <your question verbatim>")
 ```
 
 **If `percona-dk` is not configured**, answer from this skill and then tell the user how to add it:

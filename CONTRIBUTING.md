@@ -25,7 +25,7 @@ If a section reads like a tutorial or product brochure, it doesn't belong in a s
 - **Links** to [docs.percona.com](https://docs.percona.com), Jira ([jira.percona.com](https://jira.percona.com)), and the relevant GitHub repo under [github.com/percona](https://github.com/percona).
 - **Length**: SKILL.md should fit on one screen unless it genuinely needs more. Detail-heavy material goes in `references/*.md` (loaded by the agent on demand).
 - **Reference the percona-dk MCP** in every skill where deeper lookup makes sense - pattern:
-  > If `percona-dk` is available, call `search_percona_docs` with `query="…", product="…", version="…"`.
+  > If `percona-dk` is available, call `search_percona_docs` with `query="<product> …", version="…"` (there is no `product` argument - name the product in the query).
 
 ## Filing an issue first
 

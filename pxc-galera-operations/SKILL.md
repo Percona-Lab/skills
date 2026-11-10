@@ -85,8 +85,7 @@ Values: `DISABLED`, `PERMISSIVE`, `ENFORCING` (default), `MASTER`. Default is `E
 PXC defaults and `wsrep_*` variable behavior shift between point releases (e.g. the exact release that changed SST defaults, removed `skip`, or added Clone). For any exact variable default, provider option, or version boundary, **call `search_percona_docs` with `version` set before writing it into config, not as a fallback.**
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-xtradb-cluster",
+search_percona_docs(query="PXC <your question verbatim>",
                     version="8.4")   # or "8.0"
 ```
 

@@ -77,8 +77,7 @@ Key startup variables (read-only; restart to change): `audit_log_filter.format` 
 The JSON filter DSL keys, the component variables, and the install script path differ across releases and are Percona-specific (the upstream manual documents only the Enterprise plugin). For any version-specific question (valid filter keys, why events aren't captured, a function that errors, format/encryption options) **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
 
 ```
-search_percona_docs(query="audit log filter <your question verbatim>",
-                    product="percona-server-for-mysql",
+search_percona_docs(query="Percona Server for MySQL audit log filter <your question verbatim>",
                     version="8.4")
 ```
 

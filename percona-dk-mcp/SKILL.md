@@ -5,7 +5,7 @@ description: "Ground-truth Percona lookup for agents that write or edit code. Qu
 
 # Percona Developer Knowledge MCP
 
-*Last updated: 2026-06-02*
+*Last updated: 2026-11-10*
 
 The Percona Developer Knowledge MCP server (**percona-dk**) is the ground-truth Percona lookup for agents that generate or modify code. It gives direct semantic-search access to Percona's official documentation, the Percona blog, and the Percona community forum, **re-ingested daily** from upstream sources.
 
@@ -13,7 +13,7 @@ The Percona Developer Knowledge MCP server (**percona-dk**) is the ground-truth 
 
 **Honest scope.** This is not a contest against a human browsing the docs with web search - for "how do I configure X" they can usually get there too. The value is the *agent* loop: code generation with no web in it, executable output, version-sensitive facts, and a high cost of being confidently wrong. It is largest when you have no web access and when you are a smaller tool-calling model carrying more stale defaults.
 
-`percona-dk` is an early, **experimental** project (v0.1, Apache-2.0, in [Percona-Lab](https://github.com/Percona-Lab/percona-dk)) - the whole thing is a work in progress, so expect rough edges and changes. **Today you run it yourself**: clone the repo and use the one-line installer (see its README). It indexes locally and works offline, which also lets you keep queries on-prem or extend the corpus with internal content. A hosted public endpoint is **coming soon** - we're gathering feedback before opening it up.
+`percona-dk` is an early, **experimental** project (v0.2, Apache-2.0, in [Percona-Lab](https://github.com/Percona-Lab/percona-dk)) - the whole thing is a work in progress, so expect rough edges and changes. **Today you run it yourself**: clone the repo and use the one-line installer (see its README). It indexes locally and works offline, which also lets you keep queries on-prem or extend the corpus with internal content. A hosted public endpoint is **coming soon** - we're gathering feedback before opening it up.
 
 > **Self-host today** via the [percona-dk repo](https://github.com/Percona-Lab/percona-dk) one-line installer. A hosted public endpoint is coming soon.
 
@@ -49,18 +49,21 @@ Call `search_percona_docs` **before** answering any of these:
 
 | Tool | Purpose |
 |---|---|
-| `search_percona_docs` | Semantic search across docs, blog, and forum. Returns ranked chunks with source URLs. Use this first. |
-| `get_percona_doc` | Fetch a specific document (or chunk) by ID returned from `search_percona_docs`. Use to read more context around a hit. |
+| `search_percona_docs(query, top_k=5, version=None)` | Semantic search across docs, blog, and forum. Returns ranked chunks with source URLs. Use this first. |
+| `get_percona_doc(url=... \| repo=..., path=..., version=..., max_chars, offset)` | Fetch the full Markdown of a page. Pass the `url` exactly as a search result printed it (simplest - version scoping carries over), or `repo` + `path` (+ `version` for multi-version repos). Long pages come back paged; the output gives the next `offset`. |
+| `give_feedback` | Report a wrong, stale, or missing result back to the percona-dk maintainers (written to a local feedback log). Use it when the corpus contradicts itself or misses something obvious. |
 
 ### `search_percona_docs` arguments
 
 - `query` *(required)* - the search question. Phrase it as the user would, **not** as keywords. "How do I configure binlog encryption on Percona Server 8.4" beats "binlog encryption ps84".
-- `version` *(strongly recommended for version-sensitive questions)* - scopes results. Valid values per product:
+- `version` *(strongly recommended for version-sensitive questions)* - a **hard filter**: only chunks tagged with that version, plus version-agnostic content (blog, forum, single-branch docs), come back. Indexed values:
   - **Percona Server for MySQL / PXC / XtraBackup / Distribution for MySQL**: `"8.0"`, `"8.4"`
   - **Percona Server for MongoDB**: `"6.0"`, `"7.0"`, `"8.0"`
   - **Percona Distribution for PostgreSQL**: `"16"`, `"17"`
-- `product` *(optional)* - narrow by product when the query is ambiguous (e.g. "backup" could mean XtraBackup or PBM).
-- `top_k` *(optional, default 5)* - increase to 10–15 when synthesizing across multiple docs.
+  - Operators, PMM, PBM, Toolkit, pg_tde, pg_stat_monitor and the other single-branch docs **ignore** `version`.
+  - **Not indexed yet:** PS / PXC / PXB **9.7**, PSMDB **8.3**, PostgreSQL **18**. Don't pass those values - search without `version`, put the version in the query text, and check the source URL of each hit.
+- `top_k` *(optional, default 5, max 20)* - increase to 10–15 when synthesizing across multiple docs.
+- There is **no `product` argument.** Name the product in the query text instead ("PBM physical restore…", "XtraBackup 8.4…").
 
 ### Query shaping that works
 
@@ -89,7 +92,7 @@ Today percona-dk is **self-hosted**. The one-line installer clones the repo, bui
 curl -fsSL https://raw.githubusercontent.com/Percona-Lab/percona-dk/main/install-percona-dk | bash
 ```
 
-It runs locally and works offline once indexed - good for air-gapped environments or extending the corpus with internal docs. To wire up a client by hand, run the server per the [repo README](https://github.com/Percona-Lab/percona-dk) and point the client's MCP config at your local endpoint (`http://localhost:8000/sse`).
+It runs locally and works offline once indexed - good for air-gapped environments or extending the corpus with internal docs. To wire up a client by hand, follow the per-client table in the [repo README](https://github.com/Percona-Lab/percona-dk): the server runs over **stdio** by default (the client launches it). An HTTP transport is in beta (`--transport streamable-http --port 8402` → `http://<host>:8402/mcp`). Port 8000 is the separate REST API, not the MCP endpoint. On Windows, use the PowerShell installer from the README.
 
 A hosted public endpoint is **coming soon** - we're gathering feedback before opening it up. Until then, self-host.
 
@@ -97,8 +100,8 @@ A hosted public endpoint is **coming soon** - we're gathering feedback before op
 
 - **The corpus is technical only.** No pricing, no roadmap commitments, no support-tier specifics.
 - **Forum content is opinion, not policy.** When `search_percona_docs` returns a forum thread, weight it accordingly and prefer doc chunks for definitive answers.
-- **Version filter is a hint, not a hard filter.** A query for `version="8.4"` will still surface 8.0 content that is relevant - read source URLs in the result before quoting.
-- **Tool naming.** The exact MCP tool names are `search_percona_docs` and `get_percona_doc`. Some agent UIs prefix them with the server slug (e.g. `mcp__percona-dk__search_percona_docs`) - the underlying tool is the same.
+- **The version filter is hard.** `version="8.4"` excludes 8.0 chunks entirely, so a feature documented only on the other line won't surface. If a scoped search comes back empty, retry without `version`, then read the source URLs before quoting.
+- **Tool naming.** The exact MCP tool names are `search_percona_docs`, `get_percona_doc`, and `give_feedback`. Some agent UIs prefix them with the server slug (e.g. `mcp__percona-dk__search_percona_docs`) - the underlying tool is the same.
 - **Web search is rarely necessary.** If you're tempted to run `web_search` for a Percona-product question, run `search_percona_docs` first. The hit rate is high and the source is authoritative.
 
 ## Sources

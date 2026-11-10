@@ -109,8 +109,7 @@ Also: `CLIENT_STATISTICS` (per IP), `THREAD_STATISTICS` (needs `thread_statistic
 The Percona-only diagnostics (`userstat`, `log_slow_verbosity`, the `INFORMATION_SCHEMA` statistics tables) and their per-release behavior are documented at docs.percona.com, not the upstream MySQL manual. For any version-specific question (current `log_slow_*` defaults, histogram auto-refresh availability, whether a counter exists on your build) **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-server-for-mysql",
+search_percona_docs(query="Percona Server for MySQL <your question verbatim>",
                     version="8.4")
 ```
 
