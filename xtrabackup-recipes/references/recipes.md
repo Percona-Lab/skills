@@ -10,8 +10,9 @@ Backup user grants (the correct set - not `SUPER`):
 CREATE USER 'backup'@'localhost' IDENTIFIED BY '…';
 GRANT BACKUP_ADMIN, PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'backup'@'localhost';
 GRANT SELECT ON performance_schema.log_status TO 'backup'@'localhost';
--- add SELECT on performance_schema.keyring_component_status / replication_group_members where those features apply
--- on 8.4, also GRANT INNODB_REDO_LOG_ARCHIVE if using redo log archiving
+GRANT SELECT ON performance_schema.keyring_component_status TO 'backup'@'localhost';
+GRANT SELECT ON performance_schema.replication_group_members TO 'backup'@'localhost';
+-- GRANT INNODB_REDO_LOG_ARCHIVE only if using redo log archiving
 ```
 
 ```bash
@@ -60,7 +61,7 @@ xtrabackup --prepare                  --target-dir=/bk/sun --incremental-dir=/bk
 xtrabackup --copy-back --target-dir=/bk/sun
 ```
 
-Faster incrementals via **page tracking**: pass `--page-tracking` to `xtrabackup --backup`. PXB 8.0.27+ uses MySQL's native page tracking (the `mysqlbackup_page_track` component) to read only the pages modified since the last LSN instead of scanning every tablespace. Note: the older Percona-Server-only `innodb_track_changed_pages` mechanism was **deprecated in PS 8.0.27 and removed in PS 8.0.30** - do not enable it; use the `--page-tracking` flag instead.
+Faster incrementals via **page tracking**: install MySQL's `component_mysqlbackup` once (`INSTALL COMPONENT "file://component_mysqlbackup";`), then pass `--page-tracking` to **both** the full backup that starts the chain and every incremental. PXB 8.0.27+ then reads only the pages modified since the last LSN instead of scanning every tablespace. Without `--page-tracking` on the full, the first incremental cannot use page tracking. Note: the older Percona-Server-only `innodb_track_changed_pages` mechanism was **deprecated in PS 8.0.27 and removed in PS 8.0.30** - do not enable it; use the `--page-tracking` flag instead.
 
 ## Recipe: stream + compress + upload to S3
 
@@ -109,7 +110,7 @@ xtrabackup --prepare --target-dir=/bk/enc
 ```bash
 # Only some tables / databases:
 xtrabackup --backup --tables='^reporting\\..*' --target-dir=/bk/reporting
-xtrabackup --backup --databases='salesdb other_db' --target-dir=/bk/two
+xtrabackup --backup --databases='mysql sys performance_schema salesdb other_db' --target-dir=/bk/two  # always list the system schemas
 xtrabackup --backup --tables-exclude='audit\\.events' --target-dir=/bk/no-audit
 ```
 
@@ -130,6 +131,12 @@ mysqlbinlog /var/lib/mysql/mysql-bin.000003 /var/lib/mysql/mysql-bin.000004 \
 ## Recipe: rebuild a replica from a backup
 
 Back up the source (or an existing replica with `--slave-info --safe-slave-backup`), prepare, copy to the new node, then point replication at the recorded coordinates.
+
+`--safe-slave-backup` stops and restarts the replica SQL thread, so the backup user needs `REPLICATION_SLAVE_ADMIN` on top of the full-backup grants:
+
+```sql
+GRANT REPLICATION_SLAVE_ADMIN ON *.* TO 'backup'@'localhost';
+```
 
 ```bash
 # GTID-based (preferred): line 3 of xtrabackup_binlog_info holds the GTID set
@@ -152,7 +159,7 @@ Two coordinate files, two purposes:
 | Topic | 8.0 | 8.4 |
 |---|---|---|
 | Redo log sizing | Both legacy variables (`innodb_log_files_in_group`, `innodb_log_file_size`) and the modern `innodb_redo_log_capacity` (8.0.30+) are recognized | Legacy variables **removed**; `innodb_redo_log_capacity` is the only knob. XtraBackup honors the active variable automatically. |
-| Required grants | `BACKUP_ADMIN` added to the base set (`PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT` + `SELECT` on `performance_schema.log_status`) | Same base set; also `INNODB_REDO_LOG_ARCHIVE` for the redo log archiving feature |
+| Required grants | `BACKUP_ADMIN` added to the base set (`PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT` + `SELECT` on `performance_schema.log_status`) | Same base set. `INNODB_REDO_LOG_ARCHIVE` is needed only for redo log archiving, on either version |
 | `mysql_native_password` plugin | Default-loaded | Not loaded by default - use `caching_sha2_password` for the backup user, or explicitly load the plugin |
 | Compression default | ZSTD (since 8.0.34-29); LZ4 and ZSTD selectable. QuickLZ removed for backup. | ZSTD; same options as 8.0.34-29+. |
 | Component-based keyring (`component_keyring_file`, `component_keyring_kmip`) | Supported | Supported; plugin-based keyring is deprecated - migrate before going to 8.4 |
@@ -164,4 +171,4 @@ Two coordinate files, two purposes:
 - **PXC backups** must include `--galera-info` if the backup will be used as an SST source or to bootstrap a new node. The file `xtrabackup_galera_info` is what `wsrep_sst_xtrabackup-v2` reads.
 - **TokuDB backup is not supported** by PXB 8.0+ (TokuDB itself was removed from PS in 8.0.28).
 - **MyRocks backup** is supported by PXB 8.0+ but copies the entire RocksDB data - no incremental support for the MyRocks portion.
-- **Verify the version pair every time.** A mismatched PXB silently produces unusable backups. Make this a script check, not a habit.
+- **Verify the version pair every time.** A mismatched PXB stops with an error; forcing it with `--no-server-version-check` can fail or produce a corrupt backup. Make this a script check, not a habit.
