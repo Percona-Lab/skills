@@ -15,7 +15,7 @@ mkdir -p ~/.claude/skills
 for skill in percona-dk-mcp mysql-to-percona percona-server-features mysql-query-optimization \
              mysql-replication-ha mysql-encryption mysql-audit-logging mysql-data-masking \
              mysql-js-stored-procedures oracle-to-percona xtrabackup-recipes percona-toolkit-recipes \
-             pmm-operations psmdb-features pbm-recipes pxc-galera-operations \
+             pmm-operations psmdb-features pbm-recipes pcsm-recipes pxc-galera-operations \
              percona-operators-on-k8s postgres-to-percona-pg mongodb-to-psmdb; do
   ln -s ~/code/percona-skills/$skill ~/.claude/skills/$skill
 done
@@ -85,6 +85,13 @@ Start a fresh AI session for each. Watch what happens: does the right skill load
 - "Restore my sharded cluster to a specific timestamp with PBM."
 - "I want to restore only one database from a PBM backup."
 - "Walk me through a PBM physical restore - what are the gotchas?"
+
+### pcsm-recipes
+
+- "Migrate my MongoDB Atlas replica set to Percona Server for MongoDB 8.0 with minimal downtime using PCSM."
+- "My PCSM server crashed halfway through the initial clone. How do I get it going again?"
+- "Write a systemd setup for PCSM with 8 clone read workers and a 1-minute HA lease TTL."
+- "Can I run two PCSM jobs from one source into the same target with different group names?"
 
 ### pxc-galera-operations
 
