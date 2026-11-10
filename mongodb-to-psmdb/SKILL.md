@@ -1,6 +1,6 @@
 ---
 name: mongodb-to-psmdb
-description: "Migrating from MongoDB (Community Edition or Atlas) to Percona Server for MongoDB (PSMDB). Use this skill when the user asks how to move a MongoDB deployment to PSMDB, whether it is drop-in, how to do an in-place package swap vs a live migration, or how to migrate off MongoDB Atlas. KEY POINTS - PSMDB is a drop-in replacement for MongoDB Community of the same major version, so Community-to-PSMDB is an in-place binary swap on the same dbPath (no dump/restore needed); migrating off Atlas or Enterprise with zero downtime uses Percona ClusterSync for MongoDB (PCSM, formerly 'Percona Link for MongoDB'), whose target must be PSMDB of the SAME major version and which does NOT sync users/roles. Feature-detail questions belong to the psmdb-features skill."
+description: "Migrating from MongoDB (Community Edition or Atlas) to Percona Server for MongoDB (PSMDB). Use this skill when the user asks how to move a MongoDB deployment to PSMDB, whether it is drop-in, how to do an in-place package swap vs a live migration, or how to migrate off MongoDB Atlas. KEY POINTS - PSMDB is a drop-in replacement for MongoDB Community of the same major version, so Community-to-PSMDB is an in-place binary swap on the same dbPath (no dump/restore needed); migrating off Atlas or Enterprise with zero downtime uses Percona ClusterSync for MongoDB (PCSM, formerly 'Percona Link for MongoDB'), whose target must be PSMDB of the same or a newer major version (never a downgrade) and which does NOT sync users/roles. Feature-detail questions belong to the psmdb-features skill; PCSM operation belongs to the pcsm-recipes skill."
 ---
 
 # Migrating to Percona Server for MongoDB (PSMDB)
@@ -24,7 +24,7 @@ PSMDB is a source-available, drop-in replacement for MongoDB Community Edition: 
 |---|---|
 | "Use `mongodump`/`mongorestore` to migrate Community MongoDB to PSMDB" | For self-hosted Community → PSMDB the documented, supported path is an **in-place binary swap on the same `dbPath`** - no logical dump/restore. PSMDB reuses the existing WiredTiger data files. |
 | "Percona Link for MongoDB will live-migrate it" | The tool was **renamed to Percona ClusterSync for MongoDB (PCSM)** as of v0.7.0. Use the current name. Docs/repo are under `pcsm`. |
-| Using PCSM to migrate *into* MongoDB Atlas, or across major versions | PCSM's **target must be PSMDB**, and source and target must be the **same major version** (6.0→6.0, 7.0→7.0, 8.0→8.0; min 6.0.17/7.0.13/8.0.0). No version upgrade during sync. |
+| Using PCSM to migrate *into* MongoDB Atlas, or to an older major version | PCSM's **target must be PSMDB**. Since PCSM 0.9.0 the target can be the same major or a newer one (6.0→7.0, 6.0→8.0, 7.0→8.0); downgrades are rejected. Minimum versions 6.0.17/7.0.13/8.0.0. |
 | Assuming PCSM brings users and roles across | PCSM does **not** synchronize users and roles - recreate them on the target. It also skips `system.*` collections, time-series, queryable-encryption, and capped-from-convert collections. |
 | Forgetting Feature Compatibility Version after an upgrade | After an in-place version upgrade PSMDB runs with the **previous** version's feature set. Raise it explicitly: `db.adminCommand({ setFeatureCompatibilityVersion: "8.0", confirm: true })`. |
 | In-place swapping a server that has data-at-rest encryption | In-place does **not** work with encryption - `mongod` cannot encrypt existing files in place; it needs an empty `dbPath` and an initial sync from other replica set members. |
@@ -53,7 +53,7 @@ For a replica set or sharded cluster, do this one node at a time (rolling restar
 
 ## Recipe: live migration off Atlas/Enterprise (PCSM)
 
-PCSM clones the source, then replicates changes via MongoDB change streams until you finalize and cut over. Source can be Atlas, MongoDB Enterprise, or PSMDB; **target must be PSMDB of the same major version**. Sharded-cluster support is Tech Preview. Workflow: `start` → `status` (Running) → `finalize` (creates indexes on target, stops) → repoint clients to PSMDB. Recreate users and roles on the target yourself - PCSM does not sync them.
+PCSM clones the source, then replicates changes via MongoDB change streams until you finalize and cut over. Source can be Atlas (M10+), MongoDB Enterprise, MongoDB Community, or PSMDB; **target must be PSMDB of the same or a newer major version**. Sharded clusters are GA since PCSM 1.0.0. Workflow: `start` → `status` (wait for `initialSync.completed`) → stop source writes → `finalize` (restores unique/TTL/hidden index behavior, stops) → repoint clients to PSMDB. Recreate users and roles on the target yourself - PCSM does not sync them. For commands, recovery, and HA, see the [`pcsm-recipes`](../pcsm-recipes/SKILL.md) skill.
 
 ## Call `percona-dk` for fresh facts
 
@@ -77,7 +77,7 @@ search_percona_docs(query="<your question verbatim>",
 
 - **Community → PSMDB is an in-place swap** on the same `dbPath`, not a dump/restore.
 - **The live-migration tool is PCSM** (Percona ClusterSync for MongoDB), formerly "Percona Link for MongoDB."
-- **PCSM target = PSMDB, same major version**, and it does not sync users/roles.
+- **PCSM target = PSMDB, same or newer major version**, and it does not sync users/roles.
 - **Raise FCV** after a version upgrade with `setFeatureCompatibilityVersion`.
 - **In-place won't work with encryption** - needs empty `dbPath` + initial sync.
 - **Fix the config after swapping** - `fork`/`pidFilePath` per distro, and THP **on** for 8.0.
