@@ -55,10 +55,10 @@ PXC 8.4 (8.4.4-x) adds MySQL Clone-plugin-based SST. Set `wsrep_sst_method=clone
 |---|---|---|
 | `wsrep_cluster_address` | - | `gcomm://` peer list; empty = bootstrap |
 | `wsrep_sst_method` | `xtrabackup-v2` | SST method (`clone` in 8.4.4+; 8.0.41+ as tech preview) |
-| `pxc_strict_mode` | `ENFORCING` | PK/engine/locking validation (`DISABLED`/`PERMISSIVE`/`ENFORCING`/`MASTER`); 8.4.11-11+ ENFORCING/MASTER also forces `sql_require_primary_key=ON` |
+| `pxc_strict_mode` | `ENFORCING` | PK/engine/locking validation (`DISABLED`/`PERMISSIVE`/`ENFORCING`/`MASTER`); 9.7.2-2+ ENFORCING/MASTER also forces `sql_require_primary_key=ON` and rejects setting it `OFF` (8.4.11-11 had this; later 8.4 releases revert to 8.4.10 behavior); lowering the mode later does not reset it |
 | `wsrep_OSU_method` | `TOI` | DDL replication mode (`TOI`/`RSU`/`NBO`) |
 | `wsrep_provider_options` | - | e.g. `gcache.size=1G;pc.weight=2` |
-| `repl.force_sst_after_inconsistency` (provider option) | off | 8.4.11-11+: a node voted out for inconsistency, or failing an IST write-set, drops `grastate.dat` on shutdown and does a full SST on restart |
+| `repl.force_sst_after_inconsistency` (provider option) | off (runtime-settable) | Added in 8.4.11-11 and 9.7.2-2. A node voted out of the cluster for a data inconsistency removes `grastate.dat` on shutdown, so its next start does a full SST instead of IST. The 8.4 notes also cover a joiner that fails to apply a write-set during IST |
 | `innodb_autoinc_lock_mode` | must be `2` | Required by Galera |
 | `wsrep_applier_threads` | `1` | Parallel apply (tune to `wsrep_cert_deps_distance`); replaces deprecated `wsrep_slave_threads` |
 | `wsrep_sync_wait` | `0` | Causal-read consistency level |

@@ -24,7 +24,7 @@ Open ports: **3306** (SQL), **4567** (group comm), **4444** (SST), **4568** (IST
 
 | Likely agent answer | Closer to reality |
 |---|---|
-| Creating tables without a primary key | Galera requires a PRIMARY KEY on **every** table for write-set ordering and parallel apply. With `pxc_strict_mode=ENFORCING` (default), DML on PK-less tables is rejected. From **8.4.11-11 / 9.7.2-2**, ENFORCING/MASTER also sets `sql_require_primary_key=ON` globally: `CREATE`/`ALTER` of a PK-less table fails, and setting it `OFF` in those modes is an error. `wsrep_certify_nonPK` (on) can auto-generate one, but the documented rule is: **all tables must have a primary key.** |
+| Creating tables without a primary key | Galera requires a PRIMARY KEY on **every** table for write-set ordering and parallel apply. With `pxc_strict_mode=ENFORCING` (default), DML on PK-less tables is rejected. From **9.7.2-2**, ENFORCING/MASTER also sets `sql_require_primary_key=ON` globally: `CREATE`/`ALTER` of a PK-less table fails, and setting it `OFF` in those modes is an error (8.4.11-11 shipped this too, but later 8.4 releases revert to the 8.4.10 behavior, so don't count on it in 8.4). `wsrep_certify_nonPK` (on) can auto-generate one, but the documented rule is: **all tables must have a primary key.** |
 | Treating `COMMIT` as guaranteed once the DML statements succeed | Certification is optimistic and resolved at **commit time**: `COMMIT` can return `ERROR 1213` (certification conflict, not a local deadlock). The app must catch it and **retry the whole transaction.** |
 | Assuming MyISAM (or any non-InnoDB) data replicates | Only **InnoDB** is replicated. `wsrep_replicate_myisam` is **OFF** by default, so MyISAM DML is node-local -> silent divergence (DDL still replicates). MyISAM-in-cluster is experimental and discouraged. |
 | Expecting writes to all nodes to scale throughput | Throughput is capped by the slowest node; concurrent same-row writes across nodes just raise the 1213 conflict rate. PXC scales reads and gives HA, not write throughput. |
@@ -68,7 +68,7 @@ Full config and the bootstrap/join command sequence are in `references/operation
 
 ## pxc_strict_mode
 
-Values: `DISABLED`, `PERMISSIVE`, `ENFORCING` (default), `MASTER`. Default is `ENFORCING`, except a standalone/bootstrapping node defaults to `DISABLED`. ENFORCING blocks unsupported operations outright (no-PK DML - and from 8.4.11-11 / 9.7.2-2 no-PK `CREATE`/`ALTER` via `sql_require_primary_key=ON` - non-InnoDB writes, `innodb_autoinc_lock_mode != 2`, `LOCK TABLES`/`GET_LOCK()`, wrong `binlog_format`, Group Replication); PERMISSIVE logs and continues. Note: validation happens on the **originating** node - an op let through on a DISABLED node is not re-checked on ENFORCING peers.
+Values: `DISABLED`, `PERMISSIVE`, `ENFORCING` (default), `MASTER`. Default is `ENFORCING`, except a standalone/bootstrapping node defaults to `DISABLED`. ENFORCING blocks unsupported operations outright (no-PK DML - and from 9.7.2-2 no-PK `CREATE`/`ALTER` via `sql_require_primary_key=ON` - non-InnoDB writes, `innodb_autoinc_lock_mode != 2`, `LOCK TABLES`/`GET_LOCK()`, wrong `binlog_format`, Group Replication); PERMISSIVE logs and continues. Lowering the mode to `PERMISSIVE`/`DISABLED` does **not** reset `sql_require_primary_key` - it stays `ON` until you set it explicitly; existing sessions keep their session value until they reconnect. Note: validation happens on the **originating** node - an op let through on a DISABLED node is not re-checked on ENFORCING peers.
 
 ## PXC vs async vs Group Replication
 
@@ -99,7 +99,7 @@ search_percona_docs(query="PXC <your question verbatim>",
 
 ## Key gotchas
 
-- **Primary key on every table; only InnoDB replicates.** No-PK DML and MyISAM writes don't replicate / get rejected; 8.4.11-11+ also rejects no-PK `CREATE`/`ALTER` under ENFORCING/MASTER.
+- **Primary key on every table; only InnoDB replicates.** No-PK DML and MyISAM writes don't replicate / get rejected; 9.7.2-2+ also rejects no-PK `CREATE`/`ALTER` under ENFORCING/MASTER (8.4.11-11 only; later 8.4 releases revert this).
 - **`COMMIT` can fail with error 1213** (certification conflict) - apps must retry the transaction.
 - **Never bootstrap into a running cluster.** It forks the cluster.
 - **`mysqld --wsrep-recover`** is how you pick the bootstrap node after an unclean full outage - not `safe_to_bootstrap`.
@@ -120,4 +120,6 @@ search_percona_docs(query="PXC <your question verbatim>",
 - [Load balancing with ProxySQL](https://docs.percona.com/percona-xtradb-cluster/8.4/load-balance-proxysql.html) · [HAProxy](https://docs.percona.com/percona-xtradb-cluster/8.4/haproxy.html)
 - [Galera Arbitrator (garbd)](https://docs.percona.com/percona-xtradb-cluster/8.4/garbd-howto.html) · [Encrypt traffic](https://docs.percona.com/percona-xtradb-cluster/8.4/encrypt-traffic.html) · [XtraBackup SST options](https://docs.percona.com/percona-xtradb-cluster/8.4/xtrabackup-sst.html)
 - [PXC 8.4.11-11 release notes](https://docs.percona.com/percona-xtradb-cluster/8.4/release-notes/8.4.11-11.html)
+- [PXC 9.7 strict mode (sql_require_primary_key rules)](https://docs.percona.com/percona-xtradb-cluster/9.7/strict-mode.html)
+- [PXC-5341: revert of the 8.4.11 strict-mode PK change on 8.4](https://github.com/percona/percona-xtradb-cluster/pull/2379)
 - [wsrep system variables](https://docs.percona.com/percona-xtradb-cluster/8.0/wsrep-system-index/) · [wsrep provider options](https://docs.percona.com/percona-xtradb-cluster/8.0/wsrep-provider-index/)
