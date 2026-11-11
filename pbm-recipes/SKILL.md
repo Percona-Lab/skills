@@ -1,17 +1,17 @@
 ---
 name: pbm-recipes
-description: "Backing up and restoring MongoDB with Percona Backup for MongoDB (PBM). Use this skill when the user asks how to back up a MongoDB replica set or sharded cluster, take logical / physical / incremental backups, enable point-in-time recovery (PITR), restore to a timestamp, do a selective (per-namespace) restore, or configure backup storage (S3, filesystem, Azure, GCS). PBM is the cluster-consistent backup tool for MongoDB and Percona Server for MongoDB. KEY POINTS - physical and incremental backups require Percona Server for MongoDB (not generic Community), selective backup/restore works for LOGICAL backups only, and physical restore is a multi-step procedure that leaves the database DOWN and is corrupted by systemd auto-restart. Verify PBM-to-server version compatibility before writing commands."
+description: "Backing up and restoring MongoDB with Percona Backup for MongoDB (PBM). Use this skill when the user asks how to back up a MongoDB replica set or sharded cluster, take logical / physical / incremental backups, enable point-in-time recovery (PITR), restore to a timestamp, do a selective (per-namespace) restore, or configure backup storage (S3, filesystem, Azure, GCS, OCI). PBM is the cluster-consistent backup tool for MongoDB and Percona Server for MongoDB. KEY POINTS - physical and incremental backups require Percona Server for MongoDB (not generic Community), selective backup/restore works for LOGICAL backups only, and physical restore is a multi-step procedure that leaves the database DOWN and is corrupted by systemd auto-restart. Verify PBM-to-server version compatibility before writing commands."
 ---
 
 # Percona Backup for MongoDB (PBM) Recipes
 
-*Last updated: 2026-06-02*
+*Last updated: 2026-11-10*
 
 PBM is a distributed, cluster-consistent backup tool for MongoDB and Percona Server for MongoDB. It backs up replica sets and sharded clusters to remote storage and supports point-in-time recovery.
 
 ## The model
 
-Four components: a **`pbm-agent`** on every non-arbiter `mongod` node (does the work), the **`pbm` CLI** (issues commands), **PBM control collections** inside MongoDB (how CLI and agents communicate), and **remote storage** (S3-compatible, filesystem, Azure, GCS, OSS). Each agent connects only to its local node via `PBM_MONGODB_URI`. All agents must reach the same storage.
+Four components: a **`pbm-agent`** on every non-arbiter `mongod` node (does the work), the **`pbm` CLI** (issues commands), **PBM control collections** inside MongoDB (how CLI and agents communicate), and **remote storage** (S3-compatible, filesystem, Azure, GCS, OCI, OSS). Each agent connects only to its local node via `PBM_MONGODB_URI` (never `mongos` - PBM 2.16.0+ rejects mongos connections). All agents must reach the same storage.
 
 > **Single-branch tool (`pbm-docs`).** Version applicability below is about which PBM/PSMDB release introduced a feature, not separate doc branches.
 
@@ -26,7 +26,8 @@ Four components: a **`pbm-agent`** on every non-arbiter `mongod` node (does the 
 | Leaving `Restart=always` on `mongod`/`pbm-agent` systemd units during a physical restore | **This corrupts the restore.** PBM controls restarts itself; systemd auto-restart must be off (`Restart=no`) for the duration. |
 | Restoring a backup into a replica set with a different name and expecting it to work | Replica set names must match, or you must remap with `--replset-remapping="newname=oldname,..."`. |
 | Forgetting the balancer on a sharded restore | Stop the balancer (and disable autosplit) and shut down all `mongos` **before** a restore. Restart them after. (Docs require this before restore, not before backup.) |
-| Assuming any PBM version backs up any MongoDB | PBM↔server compatibility is version-bound. PBM 2.8.0-2.10.0 covers PSMDB 6.0/7.0/8.0; 2.11.0+ covers 7.0/8.0. Cross-major restore also needs FCV to match. Check the matrix. |
+| Assuming any PBM version backs up any MongoDB | PBM↔server compatibility is version-bound. PBM 2.8.0-2.10.0 covers PSMDB 6.0/7.0/8.0; 2.11.0-2.17.0 (latest, 2026-10-14) covers 7.0/8.0. 2.16.0+ also recognizes 8.3 (release notes; not yet in the matrix). Cross-major restore also needs FCV to match. Check the matrix. |
+| Restoring time-series collections with `expireAfterSeconds` logically | Before a **logical restore or PITR**, set `ttlMonitorEnabled: false` on every data-bearing `mongod`, and restore the original value afterward, even if the restore fails. Otherwise TTL deletes buckets the oplog replay needs. Physical restores do this automatically (2.17.0+). |
 
 ## Recipe: configure storage
 
@@ -48,7 +49,7 @@ pbm config --file=storage.yaml
 pbm config --list
 ```
 
-`storage.type` also accepts `filesystem`, `azure`, `gcs`, `minio`, `oss`.
+`storage.type` also accepts `filesystem`, `azure`, `gcs`, `minio`, `oci` (2.15.0+), `oss`. **GCS:** 2.16.0 removed the HMAC client - use JSON service-account credentials, and reconfigure before upgrading.
 
 ## Recipe: backups
 
@@ -60,6 +61,7 @@ pbm backup --type=incremental           # subsequent increments
 pbm backup --ns="salesdb.orders"        # selective (logical only)
 pbm status                              # see backups + PITR window
 pbm list
+pbm cleanup --lifecycle --dry-run       # GFS retention preview (2.16.0+); drop --dry-run to apply
 ```
 
 ## Recipe: point-in-time recovery
@@ -114,6 +116,8 @@ search_percona_docs(query="PBM <your question verbatim>")
 - **Replica set names must match** on restore, or use `--replset-remapping`.
 - **Sharded restore:** stop balancer and `mongos` first; every shard and config-server node needs a `pbm-agent`.
 - **Check the PBM↔server version matrix** before promising a backup will restore.
+- **Time-series + `expireAfterSeconds`:** disable the TTL monitor manually before a logical restore or PITR.
+- **RHEL packages are systemd-only** (2.16.0+, no SysV init scripts) - manage `pbm-agent` with `systemctl`.
 
 ## Sources
 
@@ -122,3 +126,4 @@ search_percona_docs(query="PBM <your question verbatim>")
 - [Point-in-time recovery](https://docs.percona.com/percona-backup-mongodb/features/point-in-time-recovery/)
 - [Physical restore](https://docs.percona.com/percona-backup-mongodb/usage/restore-physical/) · [Selective backup](https://docs.percona.com/percona-backup-mongodb/features/selective-backup/)
 - [Version compatibility](https://docs.percona.com/percona-backup-mongodb/details/versions/)
+- Release notes: [2.15.0 (OCI)](https://docs.percona.com/percona-backup-mongodb/latest/release-notes/2.15.0.html) · [2.16.0](https://docs.percona.com/percona-backup-mongodb/latest/release-notes/2.16.0.html) · [2.17.0](https://docs.percona.com/percona-backup-mongodb/latest/release-notes/2.17.0.html) · [Restore time-series with TTL](https://docs.percona.com/percona-backup-mongodb/latest/usage/restore.html)
