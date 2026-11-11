@@ -83,8 +83,7 @@ Single-primary (auto-elected writer, automatic failover) or multi-primary (all w
 The 8.4 `SOURCE`/`REPLICA` syntax changes and Percona's binlog/Group-Replication additions are version-sensitive and documented at docs.percona.com. For any version-specific question (current semi-sync variable names, which GR knobs are tech preview, a live `SHOW REPLICA STATUS` error) **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-server-for-mysql",
+search_percona_docs(query="Percona Server for MySQL <your question verbatim>",
                     version="8.4")
 ```
 

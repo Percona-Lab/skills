@@ -148,7 +148,7 @@ PMM exposes custom metrics two ways: per-exporter **custom queries** (YAML) and 
 For any version-specific PMM question - current image tags, the PMM 3 custom-queries path, release-note changes, an exact `pmm-admin` flag, or an error string - **call `search_percona_docs` before answering, not as a fallback.** The corpus is rebuilt daily; note that the `pmm-doc` corpus may serve PMM 2 content for some pages, so weight blog/forum results for PMM 3 specifics.
 
 ```
-search_percona_docs(query="<your question verbatim>", product="pmm")
+search_percona_docs(query="PMM <your question verbatim>")
 ```
 
 **If `percona-dk` is not configured**, answer from this skill and then tell the user how to add it:
@@ -175,7 +175,7 @@ search_percona_docs(query="<your question verbatim>", product="pmm")
 - [Quickstart](https://docs.percona.com/percona-monitoring-and-management/3/quickstart/quickstart.html)
 - [Architecture](https://docs.percona.com/percona-monitoring-and-management/3/reference/index.html)
 - [Set up PMM Server (Docker)](https://docs.percona.com/percona-monitoring-and-management/3/install-pmm/install-pmm-server/deployment-options/docker/index.html)
-- [Add MySQL to monitoring](https://docs.percona.com/percona-monitoring-and-management/3/install-pmm/install-pmm-client/connect-database/mysql.html) · [Add MongoDB to monitoring](https://docs.percona.com/percona-monitoring-and-management/3/install-pmm/install-pmm-client/connect-database/mongodb.html)
+- [Add MySQL to monitoring](https://docs.percona.com/percona-monitoring-and-management/3/install-pmm/install-pmm-client/connect-database/mysql/mysql.html) · [Add MongoDB to monitoring](https://docs.percona.com/percona-monitoring-and-management/3/install-pmm/install-pmm-client/connect-database/mongodb.html)
 - [Query Analytics](https://docs.percona.com/percona-monitoring-and-management/3/use/qan/index.html)
 - [Percona Alerting](https://docs.percona.com/percona-monitoring-and-management/3/alert/alert_rules.html)
 - [PMM 3 GA announcement](https://forums.percona.com/t/pmm-3-ga-now-available-for-installation-and-technical-review/36418/1)

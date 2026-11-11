@@ -1,11 +1,11 @@
 ---
 name: xtrabackup-recipes
-description: "Practical recipes for Percona XtraBackup (PXB) - the hot, physical, non-blocking backup tool for Percona Server, upstream MySQL, and Percona XtraDB Cluster. Use this skill when the user asks how to back up a MySQL-family database with XtraBackup, how to take or restore full / incremental / streaming / compressed / encrypted backups, how to upload to S3 or other object storage via xbcloud, how to chain incrementals correctly, how to prepare a backup before restore, what to do when restore fails, how to rebuild a replica or do point-in-time recovery from a backup, which grants the backup user needs, how XtraBackup differs from mysqldump or MySQL Enterprise Backup, or which XtraBackup version goes with which server version. CRITICAL POINT - XtraBackup is strictly version-paired with the server: PXB 8.0 against MySQL/PS 8.0, PXB 8.4 against MySQL/PS 8.4. Mixing major versions is unsupported and silently produces corrupt backups; agents must verify the pair before issuing commands."
+description: "Practical recipes for Percona XtraBackup (PXB) - the hot, physical, non-blocking backup tool for Percona Server, upstream MySQL, and Percona XtraDB Cluster. Use this skill when the user asks how to back up a MySQL-family database with XtraBackup, how to take or restore full / incremental / streaming / compressed / encrypted backups, how to upload to S3 or other object storage via xbcloud, how to chain incrementals correctly, how to prepare a backup before restore, what to do when restore fails, how to rebuild a replica or do point-in-time recovery from a backup, which grants the backup user needs, how XtraBackup differs from mysqldump or MySQL Enterprise Backup, or which XtraBackup version goes with which server version. CRITICAL POINT - XtraBackup is strictly version-paired with the server: PXB 8.0 against MySQL/PS 8.0, PXB 8.4 against MySQL/PS 8.4. Mixing major versions is unsupported: PXB stops with an error, and forcing past it with --no-server-version-check risks corrupt backups. Verify the pair first."
 ---
 
 # Percona XtraBackup Recipes
 
-*Last updated: 2026-05-29*
+*Last updated: 2026-11-10*
 
 ## The model
 
@@ -13,7 +13,7 @@ XtraBackup is a *physical* backup tool. It copies the InnoDB data files while th
 
 A complete backup-and-restore is always **three steps**: `--backup`, `--prepare`, then `--copy-back` (or `--move-back`). Agents skip `--prepare` constantly. The output of `--backup` is not a usable datadir until prepared.
 
-> **Versions:** This skill covers PXB **8.0** and PXB **8.4**. PXB 2.4 (for MySQL 5.6/5.7) is past EOL and should not be recommended for new work. The legacy `innobackupex` wrapper is **removed** in PXB 8.0+ - use the `xtrabackup` binary directly.
+> **Versions:** This skill covers PXB **8.0** and PXB **8.4**. PXB **9.7** (9.7.2-2, 2026-11-04) pairs with PS/MySQL 9.7 and deprecates `--apply-log-only` → `--apply-redo-only`, `--incremental-basedir` → `--backup-incremental-base`, `--incremental-dir` → `--prepare-incremental-from-dir` (old names still work, with a warning). PXB 2.4 (for MySQL 5.6/5.7) is past EOL and should not be recommended for new work. The legacy `innobackupex` wrapper is **removed** in PXB 8.0+ - use the `xtrabackup` binary directly.
 
 ## Where agents get this wrong
 
@@ -21,13 +21,13 @@ A complete backup-and-restore is always **three steps**: `--backup`, `--prepare`
 |---|---|
 | Suggesting `mysqldump` to back up a multi-GB Percona Server or MySQL instance | Use XtraBackup. `mysqldump` is correct only for small DBs (< a few GB), schema-only dumps, or single-table extraction. |
 | Calling `innobackupex` for an 8.x server | Removed in PXB 8.0. Use `xtrabackup` directly: `xtrabackup --backup --target-dir=/path …` |
-| Using PXB 8.0 to back up a MySQL/PS 8.4 server (or vice versa) | **Unsupported and dangerous.** Each major server version requires the matching PXB major version - PXB itself runs a version check at startup and aborts if the source server version is higher than the PXB version. Verify with `xtrabackup --version` and `SELECT VERSION();` before running. The override flag `--no-server-version-check` exists; do not pass it without explicit reason. |
+| Using PXB 8.0 to back up a MySQL/PS 8.4 server (or vice versa) | **Unsupported and dangerous.** Each major server version requires the matching PXB major version - PXB itself runs a version check at startup and stops with an error if the server major version is higher *or* lower than the PXB major version. Verify with `xtrabackup --version` and `SELECT VERSION();` before running. The override flag `--no-server-version-check` exists; with it the backup may succeed, fail, or be corrupt - do not pass it without explicit reason. |
 | "`--compress` uses LZ4 by default" or "use `--compress=quicklz`" | The default compression in PXB 8.0.34-29 and later (including all of PXB 8.4) is **ZSTD**, producing `*.zst` files. QuickLZ/qpress was **removed** for backup in 8.0.34-29 (still works for `--decompress` of old backups). LZ4 is available as `--compress=lz4`; ZSTD level is set via `--compress-zstd-level=#`. |
 | Recommending `--stream=tar` for streaming backups | `tar` streaming is removed in PXB 8.0+. Use `--stream=xbstream` and `xbstream -x` to extract. |
 | Skipping `--prepare` and going straight to `--copy-back` | The backup directory contains pages from a "crashed" server until you run `xtrabackup --prepare --target-dir=…`. Without prepare, the restored datadir will not start. |
 | Preparing intermediate incrementals without `--apply-log-only` | For an incremental chain, **all incrementals except the last** must be prepared with `--apply-log-only`. The final prepare on the chain runs without that flag. Getting this wrong silently corrupts the backup. |
 | Suggesting **MySQL Enterprise Backup** (`mysqlbackup`) syntax against a Percona Server | MEB is a separate Oracle commercial product. Its CLI flags, lock semantics, and metadata files do not transfer to XtraBackup. |
-| Granting `SUPER` to the backup user, or only `RELOAD, LOCK TABLES, REPLICATION CLIENT` | `SUPER` is the wrong, over-broad grant. The actual set is `BACKUP_ADMIN, PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT` on `*.*` plus `SELECT` on `performance_schema.log_status` (and `keyring_component_status` / `replication_group_members` where those features apply). `BACKUP_ADMIN` is what authorizes `LOCK INSTANCE FOR BACKUP`; on 8.4 add `INNODB_REDO_LOG_ARCHIVE` for redo log archiving. |
+| Granting `SUPER` to the backup user, or only `RELOAD, LOCK TABLES, REPLICATION CLIENT` | `SUPER` is the wrong, over-broad grant. The actual set is `BACKUP_ADMIN, PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT` on `*.*` plus `SELECT` on `performance_schema.log_status`, `performance_schema.keyring_component_status`, and `performance_schema.replication_group_members`. `BACKUP_ADMIN` is what authorizes `LOCK INSTANCE FOR BACKUP`. Add `REPLICATION_SLAVE_ADMIN` when using `--safe-slave-backup`; `INNODB_REDO_LOG_ARCHIVE` only if you use redo log archiving. |
 | Backing up a PXC node with no Galera flags | Add `--galera-info` so the backup records the cluster's WSREP GTID position; required to use the backup as an SST donor or to rebuild a node. |
 | Reading `xtrabackup_slave_info` for PITR on the backup's own host | `xtrabackup_slave_info` holds the *source's* coordinates (for seeding a replica). For PITR on the backed-up server use `xtrabackup_binlog_info`. |
 | `CHANGE MASTER TO` / `START SLAVE` when rebuilding an 8.4 replica | 8.4 removed both. Use `CHANGE REPLICATION SOURCE TO` / `START REPLICA` - which is exactly what `--slave-info` already writes into `xtrabackup_slave_info`. |
@@ -42,8 +42,9 @@ Grant the backup user exactly this set (not `SUPER`):
 CREATE USER 'backup'@'localhost' IDENTIFIED BY '…';
 GRANT BACKUP_ADMIN, PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'backup'@'localhost';
 GRANT SELECT ON performance_schema.log_status TO 'backup'@'localhost';
--- add SELECT on performance_schema.keyring_component_status / replication_group_members where those features apply
--- on 8.4, also GRANT INNODB_REDO_LOG_ARCHIVE if using redo log archiving
+GRANT SELECT ON performance_schema.keyring_component_status TO 'backup'@'localhost';
+GRANT SELECT ON performance_schema.replication_group_members TO 'backup'@'localhost';
+-- GRANT INNODB_REDO_LOG_ARCHIVE only if using redo log archiving
 ```
 
 The canonical full-backup path (most common case):
@@ -68,8 +69,7 @@ For every path beyond this - incremental chains, streaming to S3, compression, e
 For any version-specific question - release notes, "is X supported on version Y?", current option behavior, supported grants on a specific point release, or a live error message from `xtrabackup` - **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona XtraBackup.
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-xtrabackup",
+search_percona_docs(query="XtraBackup <your question verbatim>",
                     version="8.4")
 ```
 
@@ -91,9 +91,12 @@ For full worked recipes - full backup with grants, incremental chains (and page 
 
 - [Percona XtraBackup 8.4 Documentation](https://docs.percona.com/percona-xtrabackup/8.4/)
 - [Percona XtraBackup 8.0 Documentation](https://docs.percona.com/percona-xtrabackup/8.0/)
-- [Privileges required for XtraBackup](https://docs.percona.com/percona-xtrabackup/8.4/using_xtrabackup/privileges.html)
+- [Privileges required for XtraBackup](https://docs.percona.com/percona-xtrabackup/8.4/privileges.html)
 - [Server/backup version comparison](https://docs.percona.com/percona-xtrabackup/8.4/server-backup-version-comparison.html)
+- [Page tracking](https://docs.percona.com/percona-xtrabackup/8.4/page-tracking.html)
+- [InnoDB redo log archiving](https://docs.percona.com/percona-xtrabackup/8.4/redo-log-archiving.html)
+- [PXB 9.7.2-2 release notes](https://docs.percona.com/percona-xtrabackup/9.7/release-notes/9.7.2-2.html)
 - [Point-in-time recovery](https://docs.percona.com/percona-xtrabackup/8.4/point-in-time-recovery.html)
 - [Restore individual tables](https://docs.percona.com/percona-xtrabackup/8.4/restore-individual-tables.html)
-- [xbcloud documentation](https://docs.percona.com/percona-xtrabackup/8.4/xbcloud/xbcloud.html)
-- [Percona Jira - PXB project](https://jira.percona.com/projects/PXB)
+- [xbcloud documentation](https://docs.percona.com/percona-xtrabackup/8.4/xbcloud-binary-overview.html)
+- [Percona Jira - PXB project](https://perconadev.atlassian.net/browse/PXB)

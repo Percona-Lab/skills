@@ -77,8 +77,7 @@ No 100% converter exists; budget for manual rewrite of procedural code. Common a
 Oracle→MySQL migration is largely general MySQL knowledge, but the Percona-specific landing spots - sequence emulation on 8.4, the features you gain post-migration, current data-type behavior - are documented at docs.percona.com. For any version-specific question ("is `PERCONA_SEQUENCE_TABLE()` available on my build?", current type semantics, recent release notes) **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-server-for-mysql",
+search_percona_docs(query="Percona Server for MySQL <your question verbatim>",
                     version="8.4")
 ```
 
