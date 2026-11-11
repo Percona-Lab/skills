@@ -1,15 +1,15 @@
 ---
 name: pmm-operations
-description: "Operating Percona Monitoring and Management (PMM) - install, client agents, Query Analytics, custom queries, and alerting. Use this skill when the user asks how to set up PMM Server or PMM Client, add a MySQL/MongoDB/PostgreSQL instance to monitoring, choose the QAN data source (slow log vs Performance Schema), write custom metrics, configure alerting, or debug a PMM connection. CRITICAL POINT - PMM 3 (GA January 2025) is the current line and its client/server are NOT cross-compatible with PMM 2: a PMM 2 client cannot register with a PMM 3 server and vice versa. Agents that emit `pmm2-client` packages or `percona/pmm-server:2` images against a PMM 3 deployment produce a broken setup. Verify the major version before writing any install command."
+description: "Operating Percona Monitoring and Management (PMM) - install, client agents, Query Analytics, custom queries, and alerting. Use this skill when the user asks how to set up PMM Server or PMM Client, add a MySQL/MongoDB/PostgreSQL instance to monitoring, choose the QAN data source (slow log vs Performance Schema), write custom metrics, configure alerting, or debug a PMM connection. CRITICAL POINT - PMM 3 (GA January 2025) is the current line and its client/server are NOT cross-compatible with PMM 2: a PMM 2 client cannot register with a PMM 3 server and vice versa. Agents that emit `pmm2-client` packages or `percona/pmm-server:2` images against a PMM 3 deployment produce a broken setup. Verify the major version before writing any install command. PMM 2 is EOL (2025-10-31); move to 3 with the official data-preserving migration (2.44.1 → 3.7 → latest), not a fresh server."
 ---
 
 # Percona Monitoring and Management (PMM) Operations
 
-*Last updated: 2026-06-02*
+*Last updated: 2026-11-10*
 
 PMM is a client/server observability stack for MySQL, Percona Server, PXC, MongoDB, PostgreSQL, and ProxySQL - a unified, supported alternative to assembling exporters, Prometheus, and Grafana yourself. **PMM Server** bundles `pmm-managed` (API/orchestration), Query Analytics, Grafana, VictoriaMetrics (metrics) and ClickHouse (QAN storage), an internal PostgreSQL, and Alertmanager behind Nginx (TLS). **PMM Client** runs `pmm-agent` (daemon), `pmm-admin` (CLI), `vmagent`, and the per-database exporters on (or near) each monitored host.
 
-> **Versions:** PMM **3** (3.0 GA January 2025, current) and PMM **2** (prior line, still deployed). PMM 3 is rootless, encrypts sensitive data, supports ARM, and replaces API keys with Grafana service-account tokens for agent auth. **Major versions do not interoperate** - match client and server. Image tags, client packages, and doc URL paths differ: `percona/pmm-server:3` vs `:2`, `pmm-client` (v3) vs `pmm2-client`, and `/percona-monitoring-and-management/3/…` vs `/2/…`. There is **no in-place upgrade across major lines** (2→3) - stand up a new server and re-register clients.
+> **Versions:** PMM **3** (3.0 GA January 2025; latest 3.10.0, October 2026) and PMM **2** (EOL 2025-10-31, still deployed). PMM 3 is rootless, encrypts sensitive data, and replaces API keys with Grafana service-account tokens for agent auth. ARM: 3.0 made the **client** official on ARM; a native ARM64 **server** image arrived in **3.10.0**. Valkey/Redis monitoring arrived in 3.5. **Major versions do not interoperate** - match client and server. Image tags, client packages, and doc URL paths differ: `percona/pmm-server:3` vs `:2`, `pmm-client` (v3) vs `pmm2-client`, and `/percona-monitoring-and-management/3/…` vs `/2/…`. **2→3 is an official migration that keeps the data** - see Upgrades below.
 
 ## Where agents get this wrong
 
@@ -22,13 +22,14 @@ PMM is a client/server observability stack for MySQL, Percona Server, PXC, Mongo
 | Installing PMM Client on the PMM Server host to watch each DB | `pmm-agent` runs on each **database** host, not on the server. (Exception: AWS RDS is monitored remotely with no client on the instance.) |
 | `--query-source=perfschema` for Percona Server / PXC | For **Percona Server / PXC** use the **slow log** (`--query-source=slowlog`) - richer data plus sampling. Use **Performance Schema** for stock MySQL 8.0+ / MariaDB. Use one source, not both. |
 | Slow-log QAN with a remote PMM Client | Slow-log QAN needs the client on the **same host** (it reads the file). For remote-only DBs (e.g. RDS) use Performance Schema. |
-| Exposing PMM Server on plain HTTP with default creds | Use HTTPS (PMM 3 container port **8443**; PMM 2 used **443**), change the default `admin` password immediately, and replace the self-signed cert for production. |
-| "Open the 40000-50000 exporter port range on the firewall" | Only the **client → server** port (PMM 3: **8443**) needs to be open. Exporters are scraped locally by the agent and pushed to the server. |
+| Exposing PMM Server on plain HTTP with default creds | Use HTTPS (PMM 3 listens on **8443** inside the container, published as host **443** with `--publish 443:8443`; PMM 2 used 443 inside too), change the default `admin` password immediately, and replace the self-signed cert for production. |
+| "Open the 40000-50000 exporter port range on the firewall" | Only the **client → server** HTTPS port (host **443** by default) needs to be open. Exporters are scraped locally by the agent and pushed to the server. |
 | Adding a MongoDB instance and expecting QAN to populate | MongoDB **profiling is disabled by default** and MUST be enabled for Query Analytics. No profiling = empty QAN. |
-| Recommending a non-Docker PMM Server install | Percona supports PMM Server via Docker/Podman, the Helm chart, or the OVF/AMI appliances. There is no supported package install of the server. |
+| Recommending a non-Docker PMM Server install, or the OVF appliance | Supported: Docker, Podman, Helm, and the AWS Marketplace AMI. The OVF appliance was removed in **PMM 3.9.0**. There is no supported package install of the server. |
 | Putting credentials in the server URL with quotes, e.g. `--server-url=https://admin:"p@ss"@host` | Quotes become part of the password → `403 Forbidden`. Pass the password without surrounding quotes. |
-| Bind-mounting a host dir to `/srv` and starting PMM 3 | PMM 3 is rootless; `/srv` must be owned by uid/gid `1000` or the container fails with `/srv is not writable for pmm user`. A named Docker volume avoids this. |
+| Bind-mounting a host dir to `/srv` and starting PMM 3 | PMM 3 is rootless; `/srv` must be owned by **uid 1000, gid 0** (`chown -R 1000:0`) or the container fails with `/srv is not writable for pmm user`. A named Docker volume avoids this. |
 | Suggesting "Integrated Alerting" | Removed. The current system is **Percona Alerting** (built on Grafana alerting), GA since PMM 2.31 and on by default in PMM 3. |
+| "Click Upgrade Now" / "Watchtower updates PMM" | Both removed in **PMM 3.9.0**. Upgrade from the CLI: `docker pull percona/pmm-server:3` and recreate the container (or the Podman/Helm equivalent). |
 | `pt-query-digest` makes PMM QAN redundant | Complementary: `pt-query-digest` is one-shot offline log analysis; QAN is continuous, stored, interactive. |
 
 ## Architecture (what to reason about)
@@ -36,13 +37,13 @@ PMM is a client/server observability stack for MySQL, Percona Server, PXC, Mongo
 - **PMM Server** - `pmm-managed` (API/orchestration), **VictoriaMetrics** (metrics), **ClickHouse** (QAN data), **Grafana** (dashboards), Alertmanager, an internal PostgreSQL, behind Nginx (TLS).
 - **PMM Client** per DB host - `pmm-agent` (daemon), `pmm-admin` (CLI), `vmagent` (pushes metrics), and exporters (`mysqld_exporter`, `node_exporter`, etc.).
 - **Data flow:** exporters → `vmagent` push → VictoriaMetrics; QAN agent collects query buckets each minute → ClickHouse.
-- **Ports:** server UI/API on **8443/8080** in PMM 3 (was **443/80** in PMM 2), agent on 7777, exporter range ~42000-51999 (local to the agent).
+- **Ports:** server UI/API listen on **8443/8080** inside the PMM 3 container (was **443/80** in PMM 2); the docs publish HTTPS as host **443** (`--publish 443:8443`). Agent on 7777, exporter range ~42000-51999 (local to the agent).
 
 ## Recipe: PMM 3 Server (Docker)
 
 ```bash
-# Easy install: checks Docker, creates network, pulls percona/pmm-server:3,
-# creates the pmm-data volume, starts server + watchtower
+# Easy install: installs Docker if missing, pulls and runs percona/pmm-server:3
+# (host port 443 by default; --interactive to change)
 curl -fsSL https://www.percona.com/get/pmm | /bin/bash
 ```
 
@@ -51,14 +52,14 @@ Manual equivalent:
 ```bash
 docker volume create pmm-data
 docker run --detach --restart always \
-  --publish 8443:8443 \
+  --publish 443:8443 \
   --volume pmm-data:/srv \
   --name pmm-server \
   percona/pmm-server:3
 docker exec -t pmm-server change-admin-password <new_password>
 ```
 
-Browse to `https://<server>:8443` and log in `admin` / `admin` (forces a password change on first login). The HTTPS port inside the container is `8443` (PMM 2 used `443`). PMM 3 uses Watchtower as the update mechanism (the easy-install script wires it up with `PMM_WATCHTOWER_HOST` / `PMM_WATCHTOWER_TOKEN`).
+Browse to `https://<server>` (host port 443) and log in `admin` / `admin` (forces a password change on first login). The HTTPS port inside the container is `8443` (PMM 2 used `443`). To upgrade (PMM 3.9+ has no UI upgrade and no Watchtower): back up, `docker pull percona/pmm-server:3`, then recreate the container on the same volume.
 
 ## Recipe: PMM Client + add a database
 
@@ -68,9 +69,9 @@ percona-release enable pmm3-client
 yum install -y pmm-client          # package is pmm-client, repo is pmm3-client
 #   Debian/Ubuntu: apt install -y pmm-client   (pmm2-client for PMM 2.x)
 
-# Register the node with the server (PMM 3 port 8443; use :443 for PMM 2)
+# Register the node with the server (host port 443, mapped to 8443 in the container)
 pmm-admin config --server-insecure-tls \
-  --server-url=https://admin:<password>@<SERVER-IP>:8443
+  --server-url=https://admin:<password>@<SERVER-IP>:443
 ```
 
 MySQL monitoring user:
@@ -132,20 +133,26 @@ QAN is the continuous counterpart to `pt-query-digest` (see [`percona-toolkit-re
 
 ## Custom queries / custom metrics
 
-PMM exposes custom metrics two ways: per-exporter **custom queries** (YAML) and the Prometheus **textfile collector** (drop `.prom` files). On PMM **2** these live under `/usr/local/percona/pmm2/collectors/` in `high-resolution/` (5s), `medium-resolution/` (10s), and `low-resolution/` (60s) subdirectories - put heavy queries in `low-resolution/` or the agent can fail to scrape within the interval.
+PMM exposes custom metrics two ways: per-exporter **custom queries** (YAML) and the Prometheus **textfile collector** (drop `.prom` files). Each has `high-resolution/` (5s), `medium-resolution/` (10s), and `low-resolution/` (60s) subdirectories - put heavy queries in `low-resolution/` or the agent can fail to scrape within the interval.
 
-> **PMM 3 path note:** the feature exists in PMM 3, but confirm the exact PMM 3 directory (the `pmm2` segment is expected to drop) via percona-dk before writing it into a script - it was not confirmed in the corpus at time of writing.
+| | PMM 3 | PMM 2 |
+|---|---|---|
+| MySQL custom queries | `/usr/local/percona/pmm/collectors/custom-queries/mysql/<res>-resolution/` | `/usr/local/percona/pmm2/collectors/custom-queries/mysql/<res>-resolution/` |
+| Textfile collector | `/usr/local/percona/pmm/collectors/textfile-collector/<res>-resolution/` | `/usr/local/percona/pmm2/collectors/textfile-collector/<res>-resolution/` |
+
+PostgreSQL uses `custom-queries/postgresql/` in the same layout.
 
 ## Alerting, Advisors, Auth
 
 - **Percona Alerting** (PMM 2.31+; on by default in PMM 3) - the Grafana-based system that replaces the old "Integrated Alerting". It layers **Percona templated alerts** (curated rule templates, MetricsQL) on top of native Grafana alert rules, or you can wire an external Alertmanager. Integrated Alerting is gone; on upgrade to 2.31, templates auto-migrate but rules do not. Don't reach for "Integrated Alerting".
-- **Advisors** - automated Security/Configuration/Performance/Query health checks that run on a schedule (default 24h). A free, Percona-specific source of "what's wrong with this server" that agents rarely mention.
+- **Advisors** - automated Security/Configuration/Performance/Query health checks that run on a schedule (default 24h). Built in and free since PMM 3.5 (no Percona Platform account). A Percona-specific source of "what's wrong with this server" that agents rarely mention.
 - **Auth:** PMM 3 uses Grafana **service-account tokens**; PMM 2 uses **API keys** (auto-migrated on upgrade). Always change the default `admin` password and front the server with TLS.
-- **Upgrades:** within a major line, upgrade via the Home-dashboard update panel (server **before** clients). Across majors (2→3) there's no in-place upgrade - deploy a fresh PMM 3 server and re-register clients with the `pmm-client` (v3) package.
+- **Upgrades:** within PMM 3, back up, then pull `percona/pmm-server:3` and recreate the container (Docker/Podman), or `helm upgrade` (server **before** clients). The UI upgrade and Watchtower were removed in 3.9.0.
+- **2→3 migration** keeps the data: upgrade the PMM 2 server to **2.44.1**, then migrate to PMM 3 (`get-pmm.sh -b` or manual: `chown -R 1000:0 /srv`, rerun as `percona/pmm-server:3` with `-p 443:8443`). Direct migration to the latest 3.x is deprecated since 3.8; if it fails, go via **3.7.0** then upgrade. The 3.7 path lasts through 3.12.0; from 3.13.0 (expected January 2027) migration from 2.x is no longer possible. Then upgrade clients to `pmm-client` v3 (no unregister needed on a migrated server) and move API keys to service accounts.
 
 ## Call `percona-dk` for fresh facts
 
-For any version-specific PMM question - current image tags, the PMM 3 custom-queries path, release-note changes, an exact `pmm-admin` flag, or an error string - **call `search_percona_docs` before answering, not as a fallback.** The corpus is rebuilt daily; note that the `pmm-doc` corpus may serve PMM 2 content for some pages, so weight blog/forum results for PMM 3 specifics.
+For any version-specific PMM question - current image tags, release-note changes, an exact `pmm-admin` flag, or an error string - **call `search_percona_docs` before answering, not as a fallback.** The corpus is rebuilt daily; note that the `pmm-doc` corpus may serve PMM 2 content for some pages, so weight blog/forum results for PMM 3 specifics.
 
 ```
 search_percona_docs(query="PMM <your question verbatim>")
@@ -162,12 +169,12 @@ search_percona_docs(query="PMM <your question verbatim>")
 ## Key gotchas
 
 - **Major-version match.** PMM 3 client ↔ PMM 3 server. The `404` at registration is almost always a 2-vs-3 mismatch.
-- **Port 8443 (PMM 3), 443 (PMM 2).** Don't tell users to open exporter port ranges.
+- **Host port 443; 8443 is the PMM 3 in-container port.** Don't tell users to open exporter port ranges.
 - **Slow log for Percona Server/PXC, Perf Schema for stock MySQL/MariaDB.** Slow-log QAN requires the client on the same host.
 - **MongoDB QAN needs profiling on.** Single most common "QAN is empty" cause.
-- **Rootless `/srv`.** Use a named volume, or `chown -R 1000:1000` a bind mount.
+- **Rootless `/srv`.** Use a named volume, or `chown -R 1000:0` a bind mount.
 - **No quotes inside `--server-url` passwords.** They cause `403`.
-- **Watchtower + old Docker API.** On upgrade you may hit `client version is too old`; the fix is setting `DOCKER_API_VERSION` on the container (verify the exact value via the MCP for your release).
+- **No UI upgrades on 3.9+.** Upgrade by pulling `percona/pmm-server:3` and recreating the container; remove any leftover Watchtower container.
 
 ## Sources
 
@@ -176,6 +183,8 @@ search_percona_docs(query="PMM <your question verbatim>")
 - [Architecture](https://docs.percona.com/percona-monitoring-and-management/3/reference/index.html)
 - [Set up PMM Server (Docker)](https://docs.percona.com/percona-monitoring-and-management/3/install-pmm/install-pmm-server/deployment-options/docker/index.html)
 - [Add MySQL to monitoring](https://docs.percona.com/percona-monitoring-and-management/3/install-pmm/install-pmm-client/connect-database/mysql/mysql.html) · [Add MongoDB to monitoring](https://docs.percona.com/percona-monitoring-and-management/3/install-pmm/install-pmm-client/connect-database/mongodb.html)
+- [Upgrade PMM Server (Docker)](https://docs.percona.com/percona-monitoring-and-management/3/pmm-upgrade/upgrade_docker.html) · [Migrate PMM 2 to PMM 3](https://docs.percona.com/percona-monitoring-and-management/3/pmm-upgrade/migrating_from_pmm_2.html) · [PMM 3.9.0 release notes](https://docs.percona.com/percona-monitoring-and-management/3/release-notes/3.9.0.html)
+- [MySQL custom queries](https://docs.percona.com/percona-monitoring-and-management/3/install-pmm/install-pmm-client/connect-database/mysql/custom_queries.html)
 - [Query Analytics](https://docs.percona.com/percona-monitoring-and-management/3/use/qan/index.html)
 - [Percona Alerting](https://docs.percona.com/percona-monitoring-and-management/3/alert/alert_rules.html)
 - [PMM 3 GA announcement](https://forums.percona.com/t/pmm-3-ga-now-available-for-installation-and-technical-review/36418/1)
