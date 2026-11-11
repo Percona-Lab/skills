@@ -134,8 +134,8 @@ search_percona_docs(query="<your question verbatim>",
 
 ## Sources
 
-- [PSMDB vs MongoDB Community comparison](https://docs.percona.com/percona-server-for-mongodb/8.0/comparison/)
-- [Hot Backup](https://docs.percona.com/percona-server-for-mongodb/8.0/hot-backup/)
-- [Data-at-rest encryption](https://docs.percona.com/percona-server-for-mongodb/8.0/data-at-rest-encryption/)
-- [Audit logging](https://docs.percona.com/percona-server-for-mongodb/8.0/audit-logging/)
-- [Authentication](https://docs.percona.com/percona-server-for-mongodb/8.0/authentication/) · [In-memory engine](https://docs.percona.com/percona-server-for-mongodb/8.0/inmemory/)
+- [PSMDB vs MongoDB Community comparison](https://docs.percona.com/percona-server-for-mongodb/8.0/comparison.html)
+- [Hot Backup](https://docs.percona.com/percona-server-for-mongodb/8.0/hot-backup.html)
+- [Data-at-rest encryption](https://docs.percona.com/percona-server-for-mongodb/8.0/data-at-rest-encryption.html)
+- [Audit logging](https://docs.percona.com/percona-server-for-mongodb/8.0/audit-logging.html)
+- [Authentication](https://docs.percona.com/percona-server-for-mongodb/8.0/authentication.html) · [In-memory engine](https://docs.percona.com/percona-server-for-mongodb/8.0/inmemory.html)

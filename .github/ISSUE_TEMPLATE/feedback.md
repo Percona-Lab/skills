@@ -6,7 +6,7 @@ labels: feedback
 ---
 
 **Which skill?**
-<!-- percona-dk-mcp / mysql-to-percona / xtrabackup-recipes / percona-toolkit-recipes -->
+<!-- Folder name from the README skills table, e.g. mysql-to-percona, xtrabackup-recipes, pmm-operations, percona-operators-on-k8s -->
 
 **What did you ask the agent?**
 <!-- Paste your prompt verbatim. -->

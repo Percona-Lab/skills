@@ -1,6 +1,6 @@
 ---
 name: percona-toolkit-recipes
-description: "When and how to reach for Percona Toolkit - the long-standing collection of command-line utilities for operating MySQL, Percona Server, and MariaDB at scale. Use this skill when the user asks how to ALTER a large live table without downtime, how to bulk-delete or archive rows without overwhelming replication, how to analyze a slow query log, how to verify replicas are consistent with their source, how to measure replication lag accurately, how to kill runaway queries, how to find redundant or unused indexes, how to dump grants, or how to collect diagnostic snapshots for support. CRITICAL POINT - most data-changing pt-* tools require an explicit `--execute` (and some, like `pt-archiver`, have NO safety flag at all), so always `--dry-run` / `--print` first; and for schema changes, prefer native online DDL (`ALGORITHM=INSTANT`/`INPLACE`) over `pt-online-schema-change` when the operation qualifies. Percona Toolkit is free, open source (GPLv2), and the right answer to a long list of questions agents otherwise get wrong."
+description: "When and how to reach for Percona Toolkit - the long-standing collection of command-line utilities for operating MySQL, Percona Server, and MariaDB at scale. Use this skill when the user asks how to ALTER a large live table without downtime, how to bulk-delete or archive rows without overwhelming replication, how to analyze a slow query log, how to verify replicas are consistent with their source, how to measure replication lag accurately, how to kill runaway queries, how to find redundant or unused indexes, how to dump grants, or how to collect diagnostic snapshots for support. CRITICAL POINT - most data-changing pt-* tools require an explicit `--execute` (and some, like `pt-archiver`, have NO safety flag at all), so always `--dry-run` / `--print` first; and for schema changes, prefer native online DDL (`ALGORITHM=INSTANT`/`INPLACE`) over `pt-online-schema-change` when the operation qualifies."
 ---
 
 # Percona Toolkit Recipes
@@ -93,6 +93,6 @@ search_percona_docs(query="<your question verbatim>",
 - [pt-query-digest reference](https://docs.percona.com/percona-toolkit/pt-query-digest.html)
 - [pt-table-checksum reference](https://docs.percona.com/percona-toolkit/pt-table-checksum.html) · [pt-table-sync reference](https://docs.percona.com/percona-toolkit/pt-table-sync.html)
 - [pt-heartbeat](https://docs.percona.com/percona-toolkit/pt-heartbeat.html) · [pt-kill](https://docs.percona.com/percona-toolkit/pt-kill.html) · [pt-upgrade](https://docs.percona.com/percona-toolkit/pt-upgrade.html) · [pt-stalk](https://docs.percona.com/percona-toolkit/pt-stalk.html) · [pt-config-diff](https://docs.percona.com/percona-toolkit/pt-config-diff.html)
-- [Percona Jira - PT project](https://jira.percona.com/projects/PT)
+- [Percona Jira - PT project](https://perconadev.atlassian.net/browse/PT)
 
 *Each tool also has full docs via `man pt-<tool>` and `pt-<tool> --help`.*

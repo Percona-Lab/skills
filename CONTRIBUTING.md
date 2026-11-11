@@ -22,7 +22,7 @@ If a section reads like a tutorial or product brochure, it doesn't belong in a s
   - Percona Server for MySQL / PXC / XtraBackup / PG Distribution: 8.0 vs 8.4 (PS/PXC) or 16 vs 17 (PG).
   - Percona Server for MongoDB: 6.0, 7.0, 8.0.
   - PMM: 2.x vs 3.x.
-- **Links** to [docs.percona.com](https://docs.percona.com), Jira ([jira.percona.com](https://jira.percona.com)), and the relevant GitHub repo under [github.com/percona](https://github.com/percona).
+- **Links** to [docs.percona.com](https://docs.percona.com), Jira ([perconadev.atlassian.net](https://perconadev.atlassian.net)), and the relevant GitHub repo under [github.com/percona](https://github.com/percona).
 - **Length**: SKILL.md should fit on one screen unless it genuinely needs more. Detail-heavy material goes in `references/*.md` (loaded by the agent on demand).
 - **Reference the percona-dk MCP** in every skill where deeper lookup makes sense - pattern:
   > If `percona-dk` is available, call `search_percona_docs` with `query="…", product="…", version="…"`.
