@@ -121,11 +121,11 @@ This is real lag (now − last applied heartbeat timestamp), unaffected by an id
 
 ## Other tools worth knowing
 
-- **`pt-kill`** - kill connections matching predicates (`--busy-time`, `--match-user`, `--match-info`, etc.). `--print` to preview before `--kill`. Default `--victims oldest`; use `--victims all` to kill every match, `--kill-query` to cancel the query but keep the connection.
-- **`pt-stalk`** / **`pt-pmp`** - `pt-stalk` watches a trigger condition (e.g. `Threads_running > 50`) and dumps diagnostics on fire; pair with `pt-mext` to analyze the snapshots. `pt-pmp` aggregates stack traces (use eu-stack, not GDB, in production).
+- **`pt-kill`** - kill connections matching predicates (`--busy-time`, `--match-user`, `--match-info`, etc.). `--print` to preview before `--kill`. Default `--victims oldest`; use `--victims all` to kill every match, `--kill-query` to cancel the query but keep the connection. 3.7.2+ adds a `Db:` column to the default output (PT-2541) - fix parsers.
+- **`pt-stalk`** / **`pt-pmp`** - `pt-stalk` watches a trigger condition (e.g. `Threads_running > 50`) and dumps diagnostics on fire; pair with `pt-mext` to analyze the snapshots. `pt-pmp` aggregates stack traces. Its default `--dumper gdb` can freeze the server; in production pass `--dumper eu` (eu-stack) or `--dumper pteu` (pt-eustack-resolver).
 - **`pt-upgrade`** - replay queries against two servers and diff results / errors / row-counts before a version upgrade (`pt-upgrade h=old h=new slow.log`); non-zero exit on any difference, so it scripts well in CI.
 - **`pt-mysql-summary` / `pt-summary`** - single-shot read-only text snapshot of the server / host config and current state. The first thing to attach to a support case.
-- **`pt-show-grants`** - dump grants in a canonical, diffable form (cleaner than `mysql.user` queries; great for version control).
+- **`pt-show-grants`** - dump grants in a canonical, diffable form (cleaner than `mysql.user` queries; great for version control). 3.7.2 renamed `--convert-MariaDB` to `--convert-from-mariadb` (PT-2564).
 - **`pt-secure-collect`** - sanitized diagnostics bundle for sharing with Percona Support without leaking data.
 - **`pt-config-diff`** - diff `SHOW VARIABLES` between two running servers, or a `my.cnf` vs a live server (`pt-config-diff /etc/my.cnf h=prod`).
 - **`pt-variable-advisor`** - flag risky `SHOW VARIABLES` settings.
@@ -133,6 +133,7 @@ This is real lag (now − last applied heartbeat timestamp), unaffected by an id
 - **`pt-index-usage`** - replay a slow log to find indexes that are never used.
 - **`pt-deadlock-logger`** / **`pt-fk-error-logger`** - parse `SHOW ENGINE INNODB STATUS` for deadlocks / FK errors; log to stdout or a table.
 - **`pt-replica-restart`** (was `pt-slave-restart`) - auto-restart replication past *named* transient errors (`--error-numbers=1062`); always follow with `pt-table-checksum`, since skipping diverges data.
+- **`pt-slave-delay`** - **removed in 3.7.2** (PT-2573). Use native delayed replication: `CHANGE REPLICATION SOURCE TO SOURCE_DELAY=N`.
 - **`pt-find`** - `find(1)` for tables (`pt-find --engine MyISAM --exec "ALTER TABLE %D.%N ENGINE=InnoDB"`).
 - **`pt-fingerprint`** / **`pt-visual-explain`** - normalize a query to its fingerprint; turn `EXPLAIN` into a readable tree.
 
