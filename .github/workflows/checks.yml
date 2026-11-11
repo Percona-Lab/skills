@@ -1,0 +1,42 @@
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * 1" # weekly external link check, Monday 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  skills:
+    name: skill frontmatter, relative links, README/TESTING coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 scripts/check_skills.py
+
+  external-links:
+    name: external links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          # 429: percona.com rate-limits CI runners; not a broken link.
+          args: >-
+            --no-progress
+            --accept 200,206,429
+            --max-retries 3
+            --exclude '^https?://(localhost|127\.0\.0\.1|.*\.example\.com)'
+            --exclude '<'
+            '**/*.md'
+          # Fail on pull requests and pushes; the weekly run opens nothing
+          # but shows red in the Actions tab when docs URLs move.
+          fail: true

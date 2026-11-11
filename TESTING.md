@@ -12,12 +12,9 @@ git clone git@github.com:Percona-Lab/skills.git ~/code/percona-skills
 
 # Symlink each skill into Claude Code's skill folder
 mkdir -p ~/.claude/skills
-for skill in percona-dk-mcp mysql-to-percona percona-server-features mysql-query-optimization \
-             mysql-replication-ha mysql-encryption mysql-audit-logging mysql-data-masking \
-             mysql-js-stored-procedures oracle-to-percona xtrabackup-recipes percona-toolkit-recipes \
-             pmm-operations psmdb-features pbm-recipes pxc-galera-operations \
-             percona-operators-on-k8s postgres-to-percona-pg mongodb-to-psmdb; do
-  ln -s ~/code/percona-skills/$skill ~/.claude/skills/$skill
+for d in ~/code/percona-skills/*/SKILL.md; do
+  skill=$(basename "$(dirname "$d")")
+  ln -sfn ~/code/percona-skills/$skill ~/.claude/skills/$skill
 done
 ```
 
@@ -48,6 +45,68 @@ Start a fresh AI session for each. Watch what happens: does the right skill load
 - "Does Percona Server 8.4 still have XtraDB as a storage engine?"
 - "How do I enable per-user statistics in Percona Server 8.4?"
 - "What's the right way to back up a 100GB Percona Server database?"
+
+### percona-server-features
+
+- "What does Percona Server for MySQL give me that community MySQL doesn't?"
+- "I'm reviewing a schema that runs on Percona Server 8.4. Is there anything Percona-specific I should use for observability?"
+- "Should I enable the thread pool on Percona Server for a workload with 5,000 short-lived connections?"
+- "How do I automatically kill transactions that sit idle for too long on Percona Server?"
+
+### mysql-query-optimization
+
+- "This query is slow on Percona Server 8.4. How do I find out why?"
+- "Which indexes on my Percona Server database are never used?"
+- "How do I get rows examined and InnoDB I/O per query into the slow log?"
+- "Should I drop this index? How can I test that safely first?"
+
+### mysql-replication-ha
+
+- "Set up a GTID-based replica of a Percona Server 8.4 source."
+- "Should I use semi-sync replication, Group Replication, or PXC for HA?"
+- "My script runs SHOW SLAVE STATUS and broke after upgrading to 8.4. Why?"
+- "How do I monitor replication lag accurately?"
+
+### mysql-encryption
+
+- "Encrypt all InnoDB tablespaces and binary logs on Percona Server 8.4 using HashiCorp Vault."
+- "How do I rotate the master encryption key, and does it re-encrypt all my data?"
+- "My server won't start after I enabled redo log encryption. What did I miss?"
+- "Is binary log encryption an Enterprise-only feature?"
+
+### mysql-audit-logging
+
+- "Set up audit logging on Percona Server 8.4 that logs only connections and writes to the sales database."
+- "I created an audit filter but nothing shows up in the log. Why?"
+- "How do I migrate from the old audit_log plugin to the Audit Log Filter component?"
+
+### mysql-data-masking
+
+- "Mask credit card numbers and emails for a reporting user on Percona Server."
+- "Generate realistic fake data for a test database."
+- "If I use mask_pan() in a view, is the underlying column protected?"
+
+### mysql-js-stored-procedures
+
+- "Can I write a stored procedure in JavaScript on Percona Server?"
+- "Write a JS stored function that parses a JSON column and returns a normalized string."
+- "Can my JavaScript routine call an external HTTP API?"
+
+### oracle-to-percona
+
+- "Is there an Oracle compatibility mode in Percona Server like MariaDB has?"
+- "Convert this Oracle query using CONNECT BY PRIOR and ROWNUM to Percona Server."
+- "How should I map Oracle NUMBER, VARCHAR2, and DATE types?"
+- "Port an Oracle PL/SQL package with a sequence to Percona Server 8.4."
+
+### Routing and negative checks
+
+These should load the named skill, a neighbouring skill, or none. Wrong routing is worth an issue.
+
+- "My PXC cluster lost a node during a backup." should load `pxc-galera-operations`, maybe `xtrabackup-recipes`. It should not load `mysql-replication-ha`.
+- "Write a PerconaServerMongoDB CR with PBM backups to S3." should load `percona-operators-on-k8s` before `pbm-recipes`.
+- "How do I migrate from MySQL to MariaDB?" should not recommend Percona tooling as if it were MariaDB-compatible, and no migration skill should claim MariaDB is a drop-in.
+- "Explain what a B-tree index is." should load no Percona skill.
 
 ### xtrabackup-recipes
 
@@ -141,8 +200,8 @@ DM Dennis on Slack for anything hard to put in an issue.
 
 After the dogfood window:
 
-- **Flip the repo public** on Percona-Lab if the skills hold up to real-work testing.
-- **Continue investing** in new skills (Valkey, deeper Operator recipes, replication topologies) if it's valuable.
+- **Promote beyond dogfood** (announce publicly, drop the "experiment" label) if the skills hold up to real-work testing.
+- **Continue investing** in new skills (`mysql-server-tuning`, deeper Operator recipes, replication topologies) if it's valuable.
 - **Pull into a Percona-supported deliverable** if external traction follows publication.
 
 Your feedback drives all three calls.

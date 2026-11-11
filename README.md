@@ -6,7 +6,7 @@
 
 *Brief your AI tools on Percona. Stop them from guessing.*
 
-Short markdown briefings that AI coding agents (Claude Code, Cursor, Copilot, Codex, Gemini CLI, etc.) load automatically when a Percona topic comes up. Each skill is one file: it tells the agent what to recommend, what to avoid, and where to look something up. No fine-tuning, no integration. Drop a file in the agent's skills folder; it activates on every relevant question from then on.
+Short markdown briefings that AI coding agents (Claude Code, Cursor, Copilot, Codex, Gemini CLI, etc.) load automatically when a Percona topic comes up. Each skill tells the agent what to recommend, what to avoid, and where to look something up. No fine-tuning, no integration. Drop a skill folder in the agent's skills folder; it activates on every relevant question from then on.
 
 ## Skills
 
@@ -81,14 +81,21 @@ npx skills add Percona-Lab/skills/mysql-to-percona
 
 ### Without Node.js
 
-Each skill is a single `SKILL.md` file. Drop it into your agent's skill folder:
+Each skill is a folder: a `SKILL.md`, plus a `references/` directory for a few skills (`xtrabackup-recipes`, `percona-toolkit-recipes`, `pxc-galera-operations`, `percona-operators-on-k8s`). Copy the whole folder into your agent's skill folder:
 
 ```bash
-# Claude Code / Claude Desktop
+# Claude Code / Claude Desktop - all skills
+git clone --depth 1 https://github.com/Percona-Lab/skills.git /tmp/percona-skills
+mkdir -p ~/.claude/skills
+for d in /tmp/percona-skills/*/SKILL.md; do cp -r "$(dirname "$d")" ~/.claude/skills/; done
+
+# Or a single-file skill only
 mkdir -p ~/.claude/skills/mysql-to-percona
 curl -L https://raw.githubusercontent.com/Percona-Lab/skills/main/mysql-to-percona/SKILL.md \
   -o ~/.claude/skills/mysql-to-percona/SKILL.md
 ```
+
+A `curl` of `SKILL.md` alone is fine for skills without `references/`. For the four above, it silently drops the detail files the skill tells the agent to read.
 
 - **Claude Code / Claude Desktop** - `~/.claude/skills/<skill-name>/SKILL.md`
 - **OpenAI Codex** - `~/.agents/skills/<skill-name>/SKILL.md`
