@@ -9,7 +9,7 @@ description: "What Percona Server for MongoDB (PSMDB) adds beyond MongoDB Commun
 
 PSMDB is a source-available, drop-in replacement for MongoDB Community Edition that adds, for free, most of what MongoDB charges for in Enterprise. Same wire protocol, same drivers. The value is the extra surface: hot backup, data-at-rest encryption, auditing, external auth, the in-memory engine, and log redaction.
 
-> **Versions:** PSMDB **7.0**, **8.0**, **8.3** maintained. **8.3 is GA** since 8.3.13-4 (2026-10-27); upgrade to 8.3 only from 8.0. **6.0 is EOL** (last release 6.0.25-20) - recommend upgrading, don't plan new 6.0 deployments. Several features are version-gated - see each section.
+> **Versions:** PSMDB **7.0**, **8.0**, **8.3** maintained. **8.3 is GA** since 8.3.13-4 (2026-10-27); upgrade to 8.3 only from 8.0. **6.0 is EOL** (most recent release 6.0.29-23, 2026-06-24) - recommend upgrading, don't plan new 6.0 deployments. Several features are version-gated - see each section.
 
 ## What PSMDB adds beyond MongoDB Community
 
@@ -60,7 +60,7 @@ security:
   encryptionKeyFile: /etc/mongodb/keyfile
 ```
 
-Generate the key: `openssl rand -base64 32` (32-char base64), perms `600`. For external key management use the Vault, KMIP, or OpenBao blocks instead of `encryptionKeyFile`:
+Generate the key: `openssl rand -base64 32` (32 random bytes = 44 base64 characters), perms `600`. For external key management use the Vault, KMIP, or OpenBao blocks instead of `encryptionKeyFile`:
 
 ```yaml
 # HashiCorp Vault (KV Secrets Engine v2 with versioning)
@@ -108,7 +108,7 @@ Log redaction does not redact debug messages or `system.profile` entries - it co
 
 ## Call `percona-dk` for fresh facts
 
-PSMDB features are version-gated and config syntax differs across 6.0/7.0/8.0. For any "is X supported on version Y", exact config key, or release-note question, **call `search_percona_docs` with `version` set before answering, not as a fallback.**
+PSMDB features are version-gated and config syntax differs across 7.0/8.0/8.3. For any "is X supported on version Y", exact config key, or release-note question, **call `search_percona_docs` with `version` set before answering, not as a fallback.**
 
 ```
 search_percona_docs(query="PSMDB <your question verbatim>",
@@ -129,7 +129,7 @@ search_percona_docs(query="PSMDB <your question verbatim>",
 - **Encryption is set once, on an empty dbPath.** Not togglable on a populated server.
 - **Hot backup is per-node, not cluster-consistent.** Use PBM for replica sets and shards.
 - **Version gates:** OIDC = 7.0+; OpenBao KMS = 7.0.24-13+ / 8.0.16-5+. 6.0 is EOL - upgrade.
-- **Tarballs no longer ship Database Tools** from 8.0.34-15 / 8.3.13-4 (RPM/DEB unaffected). Pro builds were sunset in 8.0.16-5; former Pro features are in public builds.
+- **Tarballs no longer ship Database Tools** from 7.0.45-24 / 8.0.34-15 / 8.3.13-4 (RPM/DEB unaffected). Pro builds were sunset in 6.0.27-21, 7.0.26-14 and 8.0.16-5; former Pro features are in public builds.
 - **No SNMP.** PSMDB is not full Enterprise parity.
 
 ## Sources
@@ -139,4 +139,4 @@ search_percona_docs(query="PSMDB <your question verbatim>",
 - [Data-at-rest encryption](https://docs.percona.com/percona-server-for-mongodb/8.0/data-at-rest-encryption.html)
 - [Audit logging](https://docs.percona.com/percona-server-for-mongodb/8.0/audit-logging.html)
 - [Authentication](https://docs.percona.com/percona-server-for-mongodb/8.0/authentication.html) · [In-memory engine](https://docs.percona.com/percona-server-for-mongodb/8.0/inmemory.html)
-- Release notes: [8.3.13-4 (8.3 GA)](https://docs.percona.com/percona-server-for-mongodb/8.3/release_notes/8.3.13-4.html) · [8.0.16-5 (OpenBao, Pro sunset)](https://docs.percona.com/percona-server-for-mongodb/8.0/release_notes/8.0.16-5.html) · [7.0.24-13 (OpenBao)](https://docs.percona.com/percona-server-for-mongodb/7.0/release_notes/7.0.24-13.html) · [Upgrade 8.0 → 8.3](https://docs.percona.com/percona-server-for-mongodb/8.3/install/upgrade-from-80.html)
+- Release notes: [8.3.13-4 (8.3 GA)](https://docs.percona.com/percona-server-for-mongodb/8.3/release_notes/8.3.13-4.html) · [8.0.16-5 (OpenBao, Pro sunset)](https://docs.percona.com/percona-server-for-mongodb/8.0/release_notes/8.0.16-5.html) · [7.0.45-24 (tarball tools)](https://docs.percona.com/percona-server-for-mongodb/7.0/release_notes/7.0.45-24.html) · [7.0.26-14 (Pro sunset)](https://docs.percona.com/percona-server-for-mongodb/7.0/release_notes/7.0.26-14.html) · [6.0.29-23](https://docs.percona.com/percona-server-for-mongodb/6.0/release_notes/6.0.29-23.html) · [7.0.24-13 (OpenBao)](https://docs.percona.com/percona-server-for-mongodb/7.0/release_notes/7.0.24-13.html) · [Upgrade 8.0 → 8.3](https://docs.percona.com/percona-server-for-mongodb/8.3/install/upgrade-from-80.html)
