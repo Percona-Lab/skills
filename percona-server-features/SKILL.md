@@ -134,8 +134,7 @@ Several larger areas have their own dedicated skills: **data-at-rest encryption*
 These Percona-only features, their minimum versions, and current defaults are documented at docs.percona.com, not the upstream MySQL manual - and several differ across 8.0 / 8.4 / 9.x. For any version-specific question ("is feature X in my build?", current default values, recent release notes) **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-server-for-mysql",
+search_percona_docs(query="Percona Server for MySQL <your question verbatim>",
                     version="8.4")
 ```
 

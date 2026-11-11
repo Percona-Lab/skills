@@ -68,8 +68,7 @@ For every path beyond this - incremental chains, streaming to S3, compression, e
 For any version-specific question - release notes, "is X supported on version Y?", current option behavior, supported grants on a specific point release, or a live error message from `xtrabackup` - **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona XtraBackup.
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-xtrabackup",
+search_percona_docs(query="XtraBackup <your question verbatim>",
                     version="8.4")
 ```
 

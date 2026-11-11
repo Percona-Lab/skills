@@ -89,8 +89,7 @@ SELECT * FROM performance_schema.keyring_component_status;
 Keyring component config (Vault/KMIP/AWS KMS `.cnf` keys), the encryption variables, and the plugin→component migration path are version-sensitive and Percona-specific - documented at docs.percona.com, not the upstream manual. For any version-specific question (current component config keys, a startup failure with encrypted redo logs, migration steps) **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-server-for-mysql",
+search_percona_docs(query="Percona Server for MySQL <your question verbatim>",
                     version="8.4")
 ```
 

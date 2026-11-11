@@ -111,9 +111,8 @@ Log redaction does not redact debug messages or `system.profile` entries - it co
 PSMDB features are version-gated and config syntax differs across 6.0/7.0/8.0. For any "is X supported on version Y", exact config key, or release-note question, **call `search_percona_docs` with `version` set before answering, not as a fallback.**
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-server-for-mongodb",
-                    version="8.0")   # or "7.0" / "6.0"
+search_percona_docs(query="PSMDB <your question verbatim>",
+                    version="8.0")   # or "7.0"; 8.3 is not indexed yet - omit version, put "8.3" in the query
 ```
 
 **If `percona-dk` is not configured**, answer from this skill and then tell the user how to add it:

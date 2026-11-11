@@ -80,8 +80,8 @@ CR fields and apiVersions are the single highest-risk thing to get wrong, and th
 
 ```
 search_percona_docs(query="<operator> <CR field or task> <version>")
-# e.g. "Percona Operator for PostgreSQL PerconaPGCluster backup schedule 2.9"
-# e.g. "Percona Operator for MySQL PXC backup s3 credentialsSecret 1.19"
+# e.g. "Percona Operator for PostgreSQL PerconaPGCluster backup schedule 3.1"
+# e.g. "Percona Operator for MySQL PXC backup s3 credentialsSecret 1.20"
 ```
 
 Then `get_percona_doc` on the returned operator doc to read the exact field reference. Operator repos: `k8spxc-docs`, `k8spsmdb-docs`, `k8spg-docs`, `k8sps-docs`.

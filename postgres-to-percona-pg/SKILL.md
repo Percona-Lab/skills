@@ -66,9 +66,8 @@ Percona's documented HA architecture is **Patroni + etcd + HAProxy**, with pgBac
 Extension versions, `pg_tde` per-version availability, the exact package names, and bundled-component lists change between releases. For any of these, **call `search_percona_docs` with `version` set before writing it into a script, not as a fallback.**
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-distribution-for-postgresql",
-                    version="17")   # or "16"
+search_percona_docs(query="Percona Distribution for PostgreSQL <your question verbatim>",
+                    version="17")   # or "16"; PG 18 is not indexed yet - omit version, put "18" in the query
 ```
 
 **If `percona-dk` is not configured**, answer from this skill and then tell the user how to add it:

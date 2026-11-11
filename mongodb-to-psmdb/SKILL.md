@@ -60,9 +60,8 @@ PCSM clones the source, then replicates changes via MongoDB change streams until
 PCSM supported-version matrices, the exact upgrade-chaining rules, and config-file specifics change between releases. For any of these, **call `search_percona_docs` before writing a procedure, not as a fallback.**
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-server-for-mongodb",
-                    version="8.0")   # or "7.0" / "6.0"; use product="pcsm" for ClusterSync
+search_percona_docs(query="PSMDB <your question verbatim>",
+                    version="8.0")   # or "7.0"; name PCSM/ClusterSync in the query text for that tool
 ```
 
 **If `percona-dk` is not configured**, answer from this skill and then tell the user how to add it:

@@ -134,8 +134,7 @@ Very short list - Percona Server adds, doesn't remove:
 Percona-only system variables, plugins, and behavior are **not** in the upstream MySQL reference manual. For any version-specific question - "is X supported on PS 8.0 / 8.4?", current default values, recent release notes, error messages from `mysqld` - **call `search_percona_docs` before answering, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
 
 ```
-search_percona_docs(query="<your question verbatim>",
-                    product="percona-server-for-mysql",
+search_percona_docs(query="Percona Server for MySQL <your question verbatim>",
                     version="8.4")
 ```
 
