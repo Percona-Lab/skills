@@ -30,11 +30,13 @@ jobs:
       - uses: lycheeverse/lychee-action@v2
         with:
           # 429: percona.com rate-limits CI runners; not a broken link.
+          # dev.mysql.com answers 403 to GitHub runners, so it can't be checked from CI.
           args: >-
             --no-progress
             --accept 200,206,429
             --max-retries 3
             --exclude '^https?://(localhost|127\.0\.0\.1|.*\.example\.com)'
+            --exclude '^https?://dev\.mysql\.com/'
             --exclude '<'
             '**/*.md'
           # Fail on pull requests and pushes; the weekly run opens nothing
