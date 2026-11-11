@@ -1,21 +1,22 @@
 ---
 name: mysql-encryption
-description: "Data-at-rest encryption and keyring management in Percona Server for MySQL. Use when encrypting InnoDB tablespaces, binary/relay logs, redo/undo logs, or temporary files; choosing or configuring a keyring (file, HashiCorp Vault, KMIP, AWS KMS); rotating the master key; or verifying what is encrypted. IMPORTANT - Percona Server provides binary-log encryption, temp-file encryption, and the Vault/KMIP/AWS-KMS keyrings in the OPEN-SOURCE build (these are MySQL Enterprise-only upstream). Encryption uses a two-tier master-key→tablespace-key hierarchy; the keyring must be loaded at startup BEFORE encrypted redo logs or binlogs can open, or the server won't start. Use keyring COMPONENTS, not the removed legacy plugins."
+description: "Data-at-rest encryption and keyring management in Percona Server for MySQL. Use when encrypting InnoDB tablespaces, binary/relay logs, redo/undo logs, or temporary files; choosing or configuring a keyring (file, HashiCorp Vault, KMIP, AWS KMS); rotating the master key; or verifying what is encrypted. IMPORTANT - Percona Server provides the Vault/KMIP/AWS-KMS keyrings in the OPEN-SOURCE build (MySQL Enterprise-only upstream) plus Percona-only temp-file encryption (encrypt_tmp_files); binlog encryption is in MySQL Community too and only needs a keyring. Encryption uses a two-tier master-key→tablespace-key hierarchy; the keyring must be loaded at startup BEFORE encrypted redo logs or binlogs can open, or the server won't start. Use keyring COMPONENTS, not the removed legacy plugins."
 ---
 
 # Percona Server Encryption & Keyring
 
-*Last updated: 2026-05-27*
+*Last updated: 2026-11-10*
 
-Percona Server encrypts data at rest with a **two-tier key hierarchy**: a per-instance **master key** wraps each tablespace's **tablespace key**, which encrypts data pages (decrypted at the I/O layer - the buffer pool holds plaintext). This makes master-key rotation cheap (re-wrap keys, don't re-encrypt data). Percona ships several capabilities that are Enterprise-only in upstream MySQL: binary/relay-log encryption, temp-file encryption, and the Vault/KMIP/AWS-KMS keyrings.
+Percona Server encrypts data at rest with a **two-tier key hierarchy**: a per-instance **master key** wraps each tablespace's **tablespace key**, which encrypts data pages (decrypted at the I/O layer - the buffer pool holds plaintext). This makes master-key rotation cheap (re-wrap keys, don't re-encrypt data). Percona ships the Vault/KMIP/AWS-KMS keyrings open source (Enterprise-only in upstream MySQL) and adds Percona-only OS temp-file encryption (`encrypt_tmp_files`). Binary/relay-log encryption is in MySQL Community as well - it only needs a keyring, and `component_keyring_file` is enough.
 
-> **Versions:** Keyring **components** (not the removed `keyring_file` plugin) are the supported model on 8.0+/8.4. Verify with `SELECT * FROM performance_schema.keyring_component_status;`. The keyring must load at startup before any encrypted redo log or binlog opens.
+> **Versions:** Keyring **components** (not the removed `keyring_file` plugin) are the supported model on 8.0+/8.4. Verify with `SELECT * FROM performance_schema.keyring_component_status;`. The keyring must load at startup before any encrypted redo log or binlog opens. 8.4.10 ships a new KMIP library; 8.4.11 fixes a startup failure on OL9/RHEL9 with `innodb_redo_log_encrypt=ON`.
 
 ## Where agents get this wrong
 
 | What you might see | What's correct |
 |---|---|
-| "Binary-log encryption / Vault keyring needs MySQL Enterprise" | All open-source in Percona Server - `binlog_encryption`, plus the Vault, KMIP, and AWS KMS keyring components |
+| "Binary-log encryption needs MySQL Enterprise" | No - `binlog_encryption` is in MySQL Community too; it only needs a keyring (any, including `component_keyring_file`) |
+| "Vault / KMIP / AWS KMS keyring needs MySQL Enterprise" | True upstream, but Percona Server ships them open source as components |
 | `--early-plugin-load=keyring_file.so` on 8.4 | The legacy plugin is gone - use `component_keyring_file` via the `mysqld.my` manifest |
 | Putting keyring settings in `my.cnf` `[mysqld]` | Components are configured in a JSON `.cnf` in the plugin dir; the `mysqld.my` manifest declares which to load |
 | Assuming `ENCRYPTION='Y'` on a table also encrypts binlogs | Independent - table uses the tablespace master key; binlogs need `binlog_encryption=ON` (separate key) |
