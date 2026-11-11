@@ -77,8 +77,7 @@ On replicas, set `component_masking_functions.dictionaries_flush_interval_second
 Data masking is tech preview - the function list, install order, the `mysql.session` grant requirement, and **GA status** shift across point releases. Before relying on it, **call `search_percona_docs` to confirm current behavior and status for your version, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
 
 ```
-search_percona_docs(query="data masking <your question verbatim>",
-                    product="percona-server-for-mysql",
+search_percona_docs(query="Percona Server for MySQL data masking <your question verbatim>",
                     version="8.4")
 ```
 

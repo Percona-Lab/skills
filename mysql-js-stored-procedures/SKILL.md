@@ -75,8 +75,7 @@ SQL `NULL` ↔ JS `null`/`undefined` (both JS values map to SQL `NULL`).
 `js_lang` is tech preview and moving - privileges, variables, the SQL↔JS type map, and (critically) **GA status** can change between point releases. Before relying on it, **call `search_percona_docs` to confirm the current status and behavior for your version, not as a fallback.** The percona-dk corpus is rebuilt daily and is authoritative for Percona Server for MySQL.
 
 ```
-search_percona_docs(query="js_lang <your question verbatim>",
-                    product="percona-server-for-mysql",
+search_percona_docs(query="Percona Server for MySQL js_lang <your question verbatim>",
                     version="8.4")
 ```
 

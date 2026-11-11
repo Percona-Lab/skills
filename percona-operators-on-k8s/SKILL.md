@@ -5,7 +5,7 @@ description: "Running Percona databases on Kubernetes with the Percona Operators
 
 # Percona Operators on Kubernetes
 
-*Last updated: 2026-06-02*
+*Last updated: 2026-11-10*
 
 Percona ships Kubernetes operators for PXC, MongoDB, PostgreSQL, and Percona Server for MySQL. They share patterns (declarative CR, Smart Update, operator-managed backups) but differ in CR kinds, apiVersions, and field names - and those shift between operator releases. **Verify every CR field against percona-dk for the operator version in use before writing a manifest.**
 
@@ -16,7 +16,7 @@ Percona ships Kubernetes operators for PXC, MongoDB, PostgreSQL, and Percona Ser
 | MySQL / PXC-based (`k8spxc`) | `PerconaXtraDBCluster` | `pxc.percona.com/v1` | `PerconaXtraDBClusterBackup` | XtraBackup |
 | MongoDB (`k8spsmdb`) | `PerconaServerMongoDB` | `psmdb.percona.com/v1` | `PerconaServerMongoDBBackup` | PBM |
 | PostgreSQL (`k8spg`) | `PerconaPGCluster` | **`pgv2.percona.com/v2`** | `PerconaPGBackup` | pgBackRest |
-| MySQL / PS-based (`k8sps`) | `PerconaServerMySQL` | `ps.percona.com/v1alpha1` | `PerconaServerMySQLBackup` | XtraBackup |
+| MySQL / PS-based (`k8sps`) | `PerconaServerMySQL` | `ps.percona.com/v1` | `PerconaServerMySQLBackup` | XtraBackup |
 
 Helm charts: `percona/pxc-operator` + `percona/pxc-db`, `percona/psmdb-operator` + `percona/psmdb-db`, `percona/pg-operator` + `percona/pg-db`, `percona/ps-operator` + `percona/ps-db`. Restore kinds follow the pattern `Percona…Restore`.
 
@@ -33,8 +33,8 @@ Helm charts: `percona/pxc-operator` + `percona/pxc-db`, `percona/psmdb-operator`
 | `spec.allowUnsafeConfigurations: true` (PXC) | Deprecated. Use the granular **`spec.unsafeFlags`** subsection (`unsafeFlags.tls`, `unsafeFlags.pxcSize`, `unsafeFlags.proxySize`, `unsafeFlags.backupIfUnhealthy`). The old boolean still parses but is on its way out. |
 | `kubectl scale statefulset <db>` / `kubectl exec` to edit `my.cnf` | The operator overwrites both - config and replica count live in the CR. **Always edit the CR.** Never edit the StatefulSet or pod directly. |
 | One CR shape for all operators | Component subsections differ: PXC `spec.pxc`, MongoDB `spec.replsets[]`, PS-MySQL `spec.mysql`, PostgreSQL `spec.instances[]`. Don't copy fields across operators. |
-| Treating PS-operator async replication as production-ready | It is **tech preview** (PS operator v1.1.0). Group Replication is the GA topology. |
-| Choosing the PS operator for cross-site / multi-cluster DR | Multi-cluster / cross-site replication is supported by the **PXC** operator, not PS. |
+| Treating PS-operator async replication as production-ready | It is **tech preview** (still, as of PS operator v1.3.0). Group Replication is the GA topology. |
+| "The PS operator has no cross-site DR" | Both support it. PS operator **v1.2.0+** links Group Replication clusters into an InnoDB ClusterSet via a separate `PerconaServerMySQLClusterSet` CR (GR only, not async; switchover is manual - edit the ClusterSet CR). |
 | Connecting the app to `<cluster>-pxc-0` directly | Connect to the `<cluster>-haproxy` service (writes) or `-haproxy-replicas` (reads), or `<cluster>-proxysql`. Pod connections bypass HA/failover. |
 | `backupName` when restoring into a *different* cluster | Cross-cluster restore needs `backupSource` + cloud creds; PVC backups are namespace-scoped and can't cross namespaces. |
 | Stale/missing `crVersion` after an operator upgrade | `crVersion` must match the installed operator version or reconciliation misbehaves. |
@@ -51,11 +51,11 @@ Both back up via XtraBackup and declare everything in the cluster CR, but they a
 | Replication | Galera **synchronous** multi-primary | **Group Replication (GA)** / async (**tech preview**) |
 | Proxy | HAProxy, ProxySQL | HAProxy, MySQL Router (Orchestrator for failover) |
 | Maturity | GA since 2019, long track record | Newer; GR GA, async tech preview |
-| Cross-site / multi-cluster DR | Supported | Not supported |
-| Choose when | Proven synchronous HA, cross-site DR, production PITR | Stock Percona Server + Group Replication + MySQL Router |
+| Cross-site / multi-cluster DR | Supported | Supported v1.2.0+ (InnoDB ClusterSet, `PerconaServerMySQLClusterSet` CR, GR only) |
+| Choose when | Proven synchronous HA, production PITR | Stock Percona Server + Group Replication + MySQL Router |
 | Helm | `percona/pxc-operator` + `percona/pxc-db` | `percona/ps-operator` + `percona/ps-db` |
 
-> **Versions (latest in scope):** PXC operator **v1.19.1** (manages PXC 8.4 / 8.0 / 5.7); PS operator **v1.1.0** (manages Percona Server 8.4 / 8.0). PS-operator **async replication is tech preview** as of v1.1.0 - not for production; Group Replication is GA. Set `crVersion` to match the installed operator.
+> **Versions (latest in scope):** PXC operator **v1.20.0** (manages PXC 8.4 / 8.0 / 5.7; default image 8.4.8-8.1); PS operator **v1.3.0** (manages Percona Server 9.7 / 8.4 / 8.0; 9.7.2-2.1 added in v1.3.0); PG operator **v3.1.0**; MongoDB operator **v1.23.1**. PS-operator **async replication and PITR are tech preview** as of v1.3.0 - not for production; Group Replication is GA. Set `crVersion` to match the installed operator.
 
 For MySQL replication/HA concepts behind these topologies, see the [mysql-replication-ha](../mysql-replication-ha/SKILL.md) skill; for Galera/PXC internals, [pxc-galera-operations](../pxc-galera-operations/SKILL.md).
 
@@ -80,8 +80,8 @@ CR fields and apiVersions are the single highest-risk thing to get wrong, and th
 
 ```
 search_percona_docs(query="<operator> <CR field or task> <version>")
-# e.g. "Percona Operator for PostgreSQL PerconaPGCluster backup schedule 2.9"
-# e.g. "Percona Operator for MySQL PXC backup s3 credentialsSecret 1.19"
+# e.g. "Percona Operator for PostgreSQL PerconaPGCluster backup schedule 3.1"
+# e.g. "Percona Operator for MySQL PXC backup s3 credentialsSecret 1.20"
 ```
 
 Then `get_percona_doc` on the returned operator doc to read the exact field reference. Operator repos: `k8spxc-docs`, `k8spsmdb-docs`, `k8spg-docs`, `k8sps-docs`.
@@ -96,8 +96,9 @@ Then `get_percona_doc` on the returned operator doc to read the exact field refe
 
 ## Key gotchas
 
-- **Two MySQL operators:** PXC-based (`pxc.percona.com`, Galera synchronous, cross-site DR, PITR GA) vs PS-based (`ps.percona.com`, Group Replication GA / async tech preview). Separate CRDs, not interchangeable - check which is installed.
+- **Two MySQL operators:** PXC-based (`pxc.percona.com`, Galera synchronous, cross-site DR, PITR GA) vs PS-based (`ps.percona.com`, Group Replication GA / async tech preview, cross-site via InnoDB ClusterSet v1.2.0+). Separate CRDs, not interchangeable - check which is installed.
 - **PostgreSQL is the odd one out:** `pgv2.percona.com/v2`, `replicas` not `size`, `PerconaPGUpgrade` for major upgrades.
+- **PG operator 3.x is a hard fork of Crunchy PGO** (v3.0.0+): the inherited Crunchy CRDs (`PostgresCluster` etc.) moved to `upstream.pgv2.percona.com`; `PerconaPGCluster` stays `pgv2.percona.com/v2` with `replicas`. Supports PG 14-18 (13 dropped in v2.9.0). v3.1.0 removed PMM2 and added `pg_tde` (PG 17/18, HashiCorp Vault KV v2 only).
 - **PXC needs odd 3 or 5 nodes**; non-standard sizes require `unsafeFlags.pxcSize`.
 - **`unsafeFlags`, not `allowUnsafeConfigurations`** (the latter is deprecated).
 - **Never edit the StatefulSet or pod** - change the CR; the operator reconciles and overwrites manual changes.
@@ -111,6 +112,6 @@ Then `get_percona_doc` on the returned operator doc to read the exact field refe
 - [Compare the MySQL operators](https://docs.percona.com/percona-operator-for-mysql/pxc/compare.html)
 - [Operator for MySQL based on PXC](https://docs.percona.com/percona-operator-for-mysql/pxc/) · [for MongoDB](https://docs.percona.com/percona-operator-for-mongodb/)
 - [Operator for PostgreSQL](https://docs.percona.com/percona-operator-for-postgresql/latest/) · [for MySQL (Percona Server)](https://docs.percona.com/percona-operator-for-mysql/ps/)
-- PXC operator: [CR options](https://docs.percona.com/percona-operator-for-mysql/pxc/operator/) · [helm](https://docs.percona.com/percona-operator-for-mysql/pxc/helm.html) · [backups](https://docs.percona.com/percona-operator-for-mysql/pxc/backups.html) · [restore](https://docs.percona.com/percona-operator-for-mysql/pxc/backups-restore.html) · [scaling](https://docs.percona.com/percona-operator-for-mysql/pxc/scaling.html) · [TLS](https://docs.percona.com/percona-operator-for-mysql/pxc/TLS.html) · [users](https://docs.percona.com/percona-operator-for-mysql/pxc/users.html)
+- PXC operator: [CR options](https://docs.percona.com/percona-operator-for-xtradb-cluster/latest/operator.html) · [helm](https://docs.percona.com/percona-operator-for-mysql/pxc/helm.html) · [backups](https://docs.percona.com/percona-operator-for-mysql/pxc/backups.html) · [restore](https://docs.percona.com/percona-operator-for-mysql/pxc/backups-restore.html) · [scaling](https://docs.percona.com/percona-operator-for-mysql/pxc/scaling.html) · [TLS](https://docs.percona.com/percona-operator-for-mysql/pxc/TLS.html) · [users](https://docs.percona.com/percona-operator-for-mysql/pxc/users.html)
 - PS operator: [how it works](https://docs.percona.com/percona-operator-for-mysql/ps/how-it-works.html) · [backups](https://docs.percona.com/percona-operator-for-mysql/ps/backups.html)
-- [MongoDB scaling](https://docs.percona.com/percona-operator-for-mongodb/scaling/)
+- [MongoDB scaling](https://docs.percona.com/percona-operator-for-mongodb/latest/scaling.html)
