@@ -15,9 +15,10 @@
         "path": "./"
       },
       "policy": {
-        "installation": "AVAILABLE"
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
       },
-      "category": "Databases",
+      "category": "database",
       "description": "All Percona skills in one plugin"
     }
   ]

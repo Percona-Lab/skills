@@ -51,7 +51,7 @@ python3 scripts/check_skills.py
 claude plugin validate .
 claude plugin marketplace add ./          # then: claude plugin install percona-skills@percona-skills
 claude plugin details percona-skills@percona-skills   # should list every skill
-codex plugin marketplace add ./           # then: codex plugin add percona-skills@percona
+codex plugin marketplace add ./           # then install Percona from /plugins in Codex
 ```
 
 ## License

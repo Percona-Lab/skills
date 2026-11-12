@@ -9,7 +9,7 @@ Errors (exit 1):
   - a skill missing from the README skills table
   - no skills found at all (layout changed?)
   - a skill folder missing from a plugin manifest's `skills` list, or a listed
-    folder that is not a skill, or a manifest that is not valid JSON
+    folder that is not a skill, or a manifest that is missing or not valid JSON
   - a SKILL.md below a skill's top folder (Codex would load it as a skill)
   - a root file or folder that Claude Code would load from the plugin root
 
@@ -66,6 +66,7 @@ def check_manifests(names, errors):
     for rel, get_skills in MANIFESTS.items():
         path = ROOT / rel
         if not path.exists():
+            errors.append(f"{rel}: missing")
             continue
         try:
             listed_raw = get_skills(json.loads(path.read_text()))
