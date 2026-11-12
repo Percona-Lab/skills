@@ -9,7 +9,7 @@ Errors (exit 1):
   - a skill missing from the README skills table
   - no skills found at all (layout changed?)
   - a skill folder missing from a plugin manifest's `skills` list, or a listed
-    folder that is not a skill, or a manifest that is missing or not valid JSON
+    folder that is not a skill, or a plugin file that is missing or not valid JSON
   - a SKILL.md below a skill's top folder (Codex would load it as a skill)
   - a root file or folder that Claude Code would load from the plugin root
 
@@ -35,6 +35,8 @@ MANIFESTS = {
     ],
     ".codex-plugin/plugin.json": lambda d: d.get("skills", []),
 }
+# Plugin files with no skills list; they only have to exist and parse.
+PLUGIN_FILES = [".agents/plugins/marketplace.json"]
 
 # Claude Code loads these from the plugin root on its own. A top-level bin/
 # also stops claude.ai org sync from installing the plugin.
@@ -63,6 +65,15 @@ def frontmatter(text):
 
 def check_manifests(names, errors):
     """Each manifest lists every skill folder, and nothing else."""
+    for rel in PLUGIN_FILES:
+        path = ROOT / rel
+        if not path.exists():
+            errors.append(f"{rel}: missing")
+            continue
+        try:
+            json.loads(path.read_text())
+        except json.JSONDecodeError as e:
+            errors.append(f"{rel}: invalid JSON ({e})")
     for rel, get_skills in MANIFESTS.items():
         path = ROOT / rel
         if not path.exists():
