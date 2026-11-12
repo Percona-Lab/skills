@@ -65,6 +65,27 @@ Open an issue to propose one, or a PR to add it.
 
 ## Installing
 
+### Claude Code plugin
+
+```
+/plugin marketplace add Percona-Lab/skills
+/plugin install percona-skills@percona-skills
+```
+
+On Claude Code 2.1.275 or later this also works in one step: `/plugin install percona-skills --marketplace Percona-Lab/skills`. Skills show up as `/percona-skills:<skill>` and still load on their own when a prompt matches.
+
+Every commit on `main` is a new version, but Claude Code doesn't auto-update third-party marketplaces by default, so fixes only arrive when you update. Run `claude plugin update percona-skills@percona-skills`, or in `/plugin` open the **Marketplaces** tab, select `percona-skills` and choose **Update marketplace** or **Enable auto-update**. (`/plugin marketplace update` on its own only refreshes the listing.)
+
+### Codex plugin (experimental)
+
+Not tested yet. Add the marketplace, then install **Percona** from the `/plugins` browser in Codex:
+
+```
+codex plugin marketplace add Percona-Lab/skills
+```
+
+If it doesn't load the skills, use `npx skills add` below or copy the folders into `~/.agents/skills/`.
+
 ### With Node.js (`npx skills`)
 
 The community [`skills` CLI](https://github.com/vercel-labs/skills) detects which agents you have installed and configures each one. Choose the skills you want from an interactive menu:

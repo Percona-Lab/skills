@@ -24,6 +24,8 @@ For Cursor, Windsurf, or Codex, swap the target directory:
 
 To pick up updates: `git -C ~/code/percona-skills pull`. All symlinks pick up the new content automatically.
 
+Claude Code users can install the plugin instead (see the README): `/plugin marketplace add Percona-Lab/skills`, then `/plugin install percona-skills@percona-skills`. Use one route, not both: with the symlinks and the plugin installed you get every skill twice, once as `/<skill>` and once as `/percona-skills:<skill>`.
+
 ## 2. Enable Percona DK (recommended)
 
 The skills lean on the percona-dk MCP for fresh, version-specific facts. Today it's self-hosted - one line clones it, builds the local index, and auto-configures Claude Code, Cursor, and Windsurf:

@@ -1,0 +1,50 @@
+{
+  "name": "percona-skills",
+  "description": "Percona skills that keep coding agents accurate on Percona Server for MySQL, Percona XtraDB Cluster, Percona Server for MongoDB, Percona Distribution for PostgreSQL, XtraBackup, PBM, PMM, Percona Toolkit and the Percona Kubernetes Operators",
+  "author": {
+    "name": "Percona",
+    "url": "https://www.percona.com"
+  },
+  "homepage": "https://github.com/Percona-Lab/skills",
+  "repository": "https://github.com/Percona-Lab/skills",
+  "license": "MIT",
+  "keywords": [
+    "percona",
+    "mysql",
+    "mongodb",
+    "postgresql",
+    "pxc",
+    "xtrabackup",
+    "pbm",
+    "pmm",
+    "kubernetes"
+  ],
+  "skills": [
+    "./mongodb-to-psmdb",
+    "./mysql-audit-logging",
+    "./mysql-data-masking",
+    "./mysql-encryption",
+    "./mysql-js-stored-procedures",
+    "./mysql-query-optimization",
+    "./mysql-replication-ha",
+    "./mysql-to-percona",
+    "./oracle-to-percona",
+    "./pbm-recipes",
+    "./percona-dk-mcp",
+    "./percona-operators-on-k8s",
+    "./percona-server-features",
+    "./percona-toolkit-recipes",
+    "./pmm-operations",
+    "./postgres-to-percona-pg",
+    "./psmdb-features",
+    "./pxc-galera-operations",
+    "./xtrabackup-recipes"
+  ],
+  "interface": {
+    "displayName": "Percona",
+    "shortDescription": "Percona skills for MySQL, MongoDB, PostgreSQL and the Kubernetes Operators",
+    "developerName": "Percona",
+    "category": "database",
+    "websiteURL": "https://www.percona.com"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "percona",
+  "interface": {
+    "displayName": "Percona"
+  },
+  "owner": {
+    "name": "Percona",
+    "url": "https://www.percona.com"
+  },
+  "plugins": [
+    {
+      "name": "percona-skills",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "database",
+      "description": "All Percona skills in one plugin"
+    }
+  ]
+}
