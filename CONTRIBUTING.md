@@ -14,7 +14,8 @@ If a section reads like a tutorial or product brochure, it doesn't belong in a s
 
 ## Conventions
 
-- **One folder per skill** at the repo root: `<skill-name>/SKILL.md`.
+- **One folder per skill** at the repo root: `<skill-name>/SKILL.md`. Add a new folder to the `skills` lists in `.claude-plugin/marketplace.json` and `.codex-plugin/plugin.json` (`scripts/check_skills.py` fails the PR otherwise).
+- **No `SKILL.md` below a skill's top folder**, and no `bin/`, `hooks/`, `commands/`, `agents/`, `skills/` or `.mcp.json` at the repo root: the repo root is the plugin root, so the plugins would load them.
 - **Frontmatter** with `name` and a specific `description` - the description is what makes the agent decide whether to load the skill. Bad descriptions ("Percona MySQL stuff") never trigger; good descriptions enumerate the tasks and symptoms that should activate the skill.
 - **Voice**: terse, imperative, no marketing language. Match the existing skills.
 - **Wrong/right pairs** in a two-column table for every claim where the agent is likely to be wrong.
@@ -42,6 +43,16 @@ ln -s ~/code/percona-skills/<skill-name> ~/.claude/skills/<skill-name>
 ```
 
 Then start a fresh Claude Code session and ask a question the skill should activate on. Confirm the agent picks it up (Claude Code shows the loaded skill in its session header).
+
+To test the plugin packaging from a local clone:
+
+```bash
+python3 scripts/check_skills.py
+claude plugin validate .
+claude plugin marketplace add ./          # then: claude plugin install percona-skills@percona-skills
+claude plugin details percona-skills@percona-skills   # should list every skill
+codex plugin marketplace add ./           # then: codex plugin add percona-skills@percona
+```
 
 ## License
 

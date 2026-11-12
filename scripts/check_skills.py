@@ -7,6 +7,11 @@ Errors (exit 1):
   - `description` longer than 1024 characters (Agent Skills limit)
   - a relative Markdown link that points at a file that does not exist
   - a skill missing from the README skills table
+  - no skills found at all (layout changed?)
+  - a skill folder missing from a plugin manifest's `skills` list, or a listed
+    folder that is not a skill, or a manifest that is not valid JSON
+  - a SKILL.md below a skill's top folder (Codex would load it as a skill)
+  - a root file or folder that Claude Code would load from the plugin root
 
 Warnings (printed, exit 0 unless --strict):
   - a skill with no section in TESTING.md
@@ -14,12 +19,29 @@ Warnings (printed, exit 0 unless --strict):
 """
 import argparse
 import datetime as dt
+import json
 import pathlib
 import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DESC_MAX = 1024
+
+# Plugin manifests that list skill folders. The repo root is the plugin root
+# for both, so every skill folder must be listed in each.
+MANIFESTS = {
+    ".claude-plugin/marketplace.json": lambda d: [
+        s for plugin in d.get("plugins", []) for s in plugin.get("skills", [])
+    ],
+    ".codex-plugin/plugin.json": lambda d: d.get("skills", []),
+}
+
+# Claude Code loads these from the plugin root on its own. A top-level bin/
+# also stops claude.ai org sync from installing the plugin.
+RESERVED_ROOT_NAMES = [
+    "agents", "bin", "commands", "hooks", "monitors", "output-styles",
+    "skills", "themes", "workflows", ".lsp.json", ".mcp.json", "settings.json",
+]
 LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
 FM_RE = re.compile(r"\A---\n(.*?)\n---\n", re.S)
 
@@ -37,6 +59,37 @@ def frontmatter(text):
                 v = v[1:-1]
             out[k.strip()] = v
     return out
+
+
+def check_manifests(names, errors):
+    """Each manifest lists every skill folder, and nothing else."""
+    for rel, get_skills in MANIFESTS.items():
+        path = ROOT / rel
+        if not path.exists():
+            continue
+        try:
+            listed_raw = get_skills(json.loads(path.read_text()))
+            if isinstance(listed_raw, str):
+                listed_raw = [listed_raw]
+            listed = {s.removeprefix("./").rstrip("/") for s in listed_raw}
+        except (json.JSONDecodeError, AttributeError, TypeError) as e:
+            errors.append(f"{rel}: cannot read skills list ({e})")
+            continue
+        for name in sorted(names - listed):
+            errors.append(f"{rel}: skill {name} is not listed")
+        for name in sorted(listed - names):
+            errors.append(f"{rel}: lists {name}, which has no SKILL.md")
+
+
+def check_layout(skills, errors):
+    """Catch files that would load as extra skills or plugin components."""
+    for d in skills:
+        for nested in sorted(d.rglob("SKILL.md")):
+            if nested.parent != d:
+                errors.append(f"{nested.relative_to(ROOT)}: nested SKILL.md would load as its own skill")
+    for name in RESERVED_ROOT_NAMES:
+        if (ROOT / name).exists():
+            errors.append(f"{name}: reserved plugin path at the repo root; Claude Code would load it for every install")
 
 
 def main():
@@ -78,6 +131,11 @@ def main():
             age = (today - dt.date.fromisoformat(m.group(1))).days
             if age > args.max_age_days:
                 warnings.append(f"{name}/SKILL.md: last updated {age} days ago ({m.group(1)})")
+
+    if not skills:
+        errors.append("no */SKILL.md found - did the layout change?")
+    check_manifests({d.name for d in skills}, errors)
+    check_layout(skills, errors)
 
     for md in sorted(ROOT.rglob("*.md")):
         if any(part.startswith(".") and part != ".github" for part in md.relative_to(ROOT).parts):
